@@ -124,25 +124,89 @@ export default {
           Routes: ['src/pages/Authorized'],
           authority: ['admin', 'user'],
           routes: [
-            // {
-            //   path: '/article',
-            //   icon: 'table',
-            //   name: '文章管理',
-            //   routes: [
-            //     {
-            //       name: '文章列表',
-            //       icon: 'smile',
-            //       path: '/article/list',
-            //       component: './article/list',
-            //     },
-            //     {
-            //       name: '发布文章',
-            //       icon: 'smile',
-            //       path: '/article/create',
-            //       component: './article/create',
-            //     },
-            //   ],
-            // },
+            {
+              path: '/article',
+              icon: 'table',
+              name: '文章管理',
+              routes: [
+                {
+                  name: '文章列表',
+                  icon: 'smile',
+                  path: '/article/list',
+                  component: './article/list',
+                },
+                {
+                  name: '发布文章',
+                  icon: 'smile',
+                  path: '/article/create',
+                  component: './article/create',
+                },
+              ],
+            },
+            {
+              path: '/goods',
+              icon: 'table',
+              name: '商品管理',
+              routes: [
+                {
+                  name: '商品列表',
+                  icon: 'smile',
+                  path: '/goods/list',
+                  component: './goods/list',
+                },
+                {
+                  name: '添加商品',
+                  icon: 'smile',
+                  path: '/goods/create',
+                  component: './goods/create',
+                },
+              ],
+            },
+            {
+              path: '/member',
+              icon: 'table',
+              name: '会员管理',
+              routes: [
+                {
+                  name: '会员列表',
+                  icon: 'smile',
+                  path: '/member/list',
+                  component: './member/list',
+                },
+              ],
+            },
+            {
+              path: '/admin',
+              icon: 'table',
+              name: '管理员',
+              routes: [
+                {
+                  name: '管理员列表',
+                  icon: 'smile',
+                  path: '/admin/list',
+                  component: './admin/list',
+                },
+              ],
+            },
+            {
+              path: '/ad',
+              icon: 'table',
+              name: '广告管理',
+              routes: [
+                {
+                  name: '广告列表',
+                  icon: 'smile',
+                  path: '/ad/list',
+                  component: './ad/list',
+                },
+                {
+                  name: '广告分类',
+                  icon: 'smile',
+                  path: '/ad/classify',
+                  component: './ad/classify',
+                },
+              ],
+            },
             {
               path: '/dashboard',
               name: 'dashboard',

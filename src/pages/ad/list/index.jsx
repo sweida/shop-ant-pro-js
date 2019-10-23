@@ -2,7 +2,6 @@ import {
   Badge,
   Button,
   Card,
-  Tag,
   Col,
   DatePicker,
   Divider,
@@ -37,11 +36,11 @@ const statusMap = ['default', 'processing', 'success', 'error'];
 const status = ['关闭', '运行中', '已上线', '异常'];
 
 /* eslint react/no-multi-comp:0 */
-@connect(({ articleList, loading }) => ({
-  articleList,
-  loading: loading.models.articleList,
+@connect(({ adList, loading }) => ({
+  adList,
+  loading: loading.models.adList,
 }))
-class ArticlesTableList extends Component {
+class AdTableList extends Component {
   state = {
     modalVisible: false,
     updateModalVisible: false,
@@ -52,42 +51,58 @@ class ArticlesTableList extends Component {
   };
   columns = [
     {
-      title: 'ID',
+      title: '编号',
       dataIndex: 'id',
     },
     {
-      title: '标题',
-      dataIndex: 'title',
-    },
-    // {
-    //   title: '封面',
-    //   dataIndex: 'img',
-    //   render(val) {
-    //     return <Avatar shape="square" size="large" src={val} />;
-    //   },
-    // },
-    {
-      title: '分类',
-      dataIndex: 'classify',
+      title: '用户名',
+      dataIndex: 'nickName',
     },
     {
-      title: '状态',
-      dataIndex: 'deleted_at',
+      title: '头像',
+      dataIndex: 'avatarUrl',
       render(val) {
-        return val ? <Tag color="red">下架</Tag> : <Tag color="blue">正常</Tag>;
+        return <Avatar size="large" src={val} icon="user" />;
       },
     },
     {
-      title: '点击量',
-      dataIndex: 'clicks',
+      title: '省份',
+      dataIndex: 'province',
     },
     {
-      title: '点赞量',
-      dataIndex: 'like_count',
+      title: '城市',
+      dataIndex: 'city',
     },
+    // {
+    //   title: '状态',
+    //   dataIndex: 'status',
+    //   filters: [
+    //     {
+    //       text: status[0],
+    //       value: '0',
+    //     },
+    //     {
+    //       text: status[1],
+    //       value: '1',
+    //     },
+    //     {
+    //       text: status[2],
+    //       value: '2',
+    //     },
+    //     {
+    //       text: status[3],
+    //       value: '3',
+    //     },
+    //   ],
+
+    //   render(val) {
+    //     return <Badge status={statusMap[val]} text={status[val]} />;
+    //   },
+    // },
     {
-      title: '发布时间',
+      title: '注册时间',
       dataIndex: 'created_at',
+      // sorter: true,
     },
     {
       title: '操作',
@@ -104,7 +119,7 @@ class ArticlesTableList extends Component {
   componentDidMount() {
     const { dispatch } = this.props;
     dispatch({
-      type: 'articleList/fetch',
+      type: 'adList/fetch',
     });
   }
 
@@ -128,7 +143,7 @@ class ArticlesTableList extends Component {
     }
 
     dispatch({
-      type: 'articleList/fetch',
+      type: 'adList/fetch',
       payload: params,
     });
   };
@@ -139,7 +154,7 @@ class ArticlesTableList extends Component {
       formValues: {},
     });
     dispatch({
-      type: 'articleList/fetch',
+      type: 'adList/fetch',
       payload: {},
     });
   };
@@ -157,7 +172,7 @@ class ArticlesTableList extends Component {
     switch (e.key) {
       case 'remove':
         dispatch({
-          type: 'articleList/remove',
+          type: 'adList/remove',
           payload: {
             key: selectedRows.map(row => row.key),
           },
@@ -191,7 +206,7 @@ class ArticlesTableList extends Component {
         formValues: values,
       });
       dispatch({
-        type: 'articleList/fetch',
+        type: 'adList/fetch',
         payload: values,
       });
     });
@@ -210,7 +225,7 @@ class ArticlesTableList extends Component {
   handleAdd = fields => {
     const { dispatch } = this.props;
     dispatch({
-      type: 'articleList/add',
+      type: 'adList/add',
       payload: {
         desc: fields.desc,
       },
@@ -221,7 +236,7 @@ class ArticlesTableList extends Component {
   handleUpdate = fields => {
     const { dispatch } = this.props;
     dispatch({
-      type: 'articleList/update',
+      type: 'adList/update',
       payload: {
         name: fields.name,
         desc: fields.desc,
@@ -430,7 +445,7 @@ class ArticlesTableList extends Component {
 
   render() {
     const {
-      articleList: { data },
+      adList: { data },
       loading,
     } = this.props;
     const { selectedRows, modalVisible, updateModalVisible, stepFormValues } = this.state;
@@ -455,7 +470,7 @@ class ArticlesTableList extends Component {
             <div className={styles.tableListForm}>{this.renderForm()}</div>
             <div className={styles.tableListOperator}>
               <Button icon="plus" type="primary" onClick={() => this.handleModalVisible(true)}>
-                新增文章
+                新建
               </Button>
               {selectedRows.length > 0 && (
                 <span>
@@ -472,8 +487,8 @@ class ArticlesTableList extends Component {
               selectedRows={selectedRows}
               loading={loading}
               data={data}
-              columns={this.columns}
               rowKey={data => data.id}
+              columns={this.columns}
               onSelectRow={this.handleSelectRows}
               onChange={this.handleStandardTableChange}
             />
@@ -492,4 +507,4 @@ class ArticlesTableList extends Component {
   }
 }
 
-export default Form.create()(ArticlesTableList);
+export default Form.create()(AdTableList);

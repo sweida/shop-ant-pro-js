@@ -37,11 +37,11 @@ const statusMap = ['default', 'processing', 'success', 'error'];
 const status = ['关闭', '运行中', '已上线', '异常'];
 
 /* eslint react/no-multi-comp:0 */
-@connect(({ articleList, loading }) => ({
-  articleList,
-  loading: loading.models.articleList,
+@connect(({ goodsList, loading }) => ({
+  goodsList,
+  loading: loading.models.goodsList,
 }))
-class ArticlesTableList extends Component {
+class GoodsTableList extends Component {
   state = {
     modalVisible: false,
     updateModalVisible: false,
@@ -59,13 +59,13 @@ class ArticlesTableList extends Component {
       title: '标题',
       dataIndex: 'title',
     },
-    // {
-    //   title: '封面',
-    //   dataIndex: 'img',
-    //   render(val) {
-    //     return <Avatar shape="square" size="large" src={val} />;
-    //   },
-    // },
+    {
+      title: '封面',
+      dataIndex: 'defaultBanner',
+      render(val) {
+        return <Avatar shape="square" size="large" src={val} />;
+      },
+    },
     {
       title: '分类',
       dataIndex: 'classify',
@@ -82,8 +82,8 @@ class ArticlesTableList extends Component {
       dataIndex: 'clicks',
     },
     {
-      title: '点赞量',
-      dataIndex: 'like_count',
+      title: '购买量',
+      dataIndex: 'buys',
     },
     {
       title: '发布时间',
@@ -104,7 +104,7 @@ class ArticlesTableList extends Component {
   componentDidMount() {
     const { dispatch } = this.props;
     dispatch({
-      type: 'articleList/fetch',
+      type: 'goodsList/fetch',
     });
   }
 
@@ -128,7 +128,7 @@ class ArticlesTableList extends Component {
     }
 
     dispatch({
-      type: 'articleList/fetch',
+      type: 'goodsList/fetch',
       payload: params,
     });
   };
@@ -139,7 +139,7 @@ class ArticlesTableList extends Component {
       formValues: {},
     });
     dispatch({
-      type: 'articleList/fetch',
+      type: 'goodsList/fetch',
       payload: {},
     });
   };
@@ -157,7 +157,7 @@ class ArticlesTableList extends Component {
     switch (e.key) {
       case 'remove':
         dispatch({
-          type: 'articleList/remove',
+          type: 'goodsList/remove',
           payload: {
             key: selectedRows.map(row => row.key),
           },
@@ -191,7 +191,7 @@ class ArticlesTableList extends Component {
         formValues: values,
       });
       dispatch({
-        type: 'articleList/fetch',
+        type: 'goodsList/fetch',
         payload: values,
       });
     });
@@ -210,7 +210,7 @@ class ArticlesTableList extends Component {
   handleAdd = fields => {
     const { dispatch } = this.props;
     dispatch({
-      type: 'articleList/add',
+      type: 'goodsList/add',
       payload: {
         desc: fields.desc,
       },
@@ -221,7 +221,7 @@ class ArticlesTableList extends Component {
   handleUpdate = fields => {
     const { dispatch } = this.props;
     dispatch({
-      type: 'articleList/update',
+      type: 'goodsList/update',
       payload: {
         name: fields.name,
         desc: fields.desc,
@@ -430,7 +430,7 @@ class ArticlesTableList extends Component {
 
   render() {
     const {
-      articleList: { data },
+      goodsList: { data },
       loading,
     } = this.props;
     const { selectedRows, modalVisible, updateModalVisible, stepFormValues } = this.state;
@@ -455,7 +455,7 @@ class ArticlesTableList extends Component {
             <div className={styles.tableListForm}>{this.renderForm()}</div>
             <div className={styles.tableListOperator}>
               <Button icon="plus" type="primary" onClick={() => this.handleModalVisible(true)}>
-                新增文章
+                添加商品
               </Button>
               {selectedRows.length > 0 && (
                 <span>
@@ -472,8 +472,8 @@ class ArticlesTableList extends Component {
               selectedRows={selectedRows}
               loading={loading}
               data={data}
-              columns={this.columns}
               rowKey={data => data.id}
+              columns={this.columns}
               onSelectRow={this.handleSelectRows}
               onChange={this.handleStandardTableChange}
             />
@@ -492,4 +492,4 @@ class ArticlesTableList extends Component {
   }
 }
 
-export default Form.create()(ArticlesTableList);
+export default Form.create()(GoodsTableList);

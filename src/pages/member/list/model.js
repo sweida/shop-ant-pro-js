@@ -1,7 +1,7 @@
 import { addRule, queryUser, removeRule, updateRule } from './service';
 
 const Model = {
-  namespace: 'goodsCreate',
+  namespace: 'memberList',
   state: {
     data: {
       list: [],

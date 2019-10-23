@@ -1,7 +1,7 @@
-import { addRule, queryUser, removeRule, updateRule } from './service';
+import { addRule, queryArticle, removeRule, updateRule } from './service';
 
 const Model = {
-  namespace: 'listAndtableList',
+  namespace: 'articleList',
   state: {
     data: {
       list: [],
@@ -10,7 +10,7 @@ const Model = {
   },
   effects: {
     *fetch({ payload }, { call, put }) {
-      const response = yield call(queryUser, payload);
+      const response = yield call(queryArticle, payload);
       yield put({
         type: 'save',
         payload: response.data,

@@ -1,7 +1,7 @@
 import request from '@/utils/request';
 
-export async function queryArticle(params) {
-  return request('/api/article/list', {
+export async function queryAd(params) {
+  return request('/api/ad/list', {
     method: 'POST',
     params,
   });

@@ -1,7 +1,7 @@
-import { addRule, queryUser, removeRule, updateRule } from './service';
+import { addRule, queryAd, removeRule, updateRule } from './service';
 
 const Model = {
-  namespace: 'goodsCreate',
+  namespace: 'adClassify',
   state: {
     data: {
       list: [],
@@ -10,7 +10,7 @@ const Model = {
   },
   effects: {
     *fetch({ payload }, { call, put }) {
-      const response = yield call(queryUser, payload);
+      const response = yield call(queryAd, payload);
       yield put({
         type: 'save',
         payload: response.data,
