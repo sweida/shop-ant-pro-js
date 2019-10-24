@@ -13,3 +13,10 @@ export async function articleDetail(params) {
     data: params,
   });
 }
+
+export async function articleEdit(params) {
+  return request('/api/article/edit', {
+    method: 'POST',
+    data: params,
+  });
+}
