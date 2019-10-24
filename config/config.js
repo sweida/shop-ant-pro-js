@@ -170,6 +170,26 @@ export default {
               ],
             },
             {
+              path: '/order',
+              icon: 'table',
+              name: '订单管理',
+              routes: [
+                {
+                  name: '订单列表',
+                  icon: 'smile',
+                  path: '/order/list',
+                  component: './order/list',
+                },
+                {
+                  name: '订单详情',
+                  icon: 'smile',
+                  path: '/order/detail',
+                  component: './order/detail',
+                  hideInMenu: true
+                },
+              ],
+            },
+            {
               path: '/member',
               icon: 'table',
               name: '会员管理',
