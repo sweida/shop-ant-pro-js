@@ -1,509 +1,272 @@
 import {
-  Badge,
   Button,
   Card,
-  Col,
   DatePicker,
-  Divider,
-  Dropdown,
   Form,
+  Upload,
   Icon,
   Input,
+  Switch,
   InputNumber,
-  Menu,
-  Row,
+  Radio,
   Select,
-  message,
-  Avatar,
+  Tooltip,
 } from 'antd';
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
+import 'braft-editor/dist/index.css';
+import BraftEditor from 'braft-editor';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import { connect } from 'dva';
-import moment from 'moment';
-import CreateForm from './components/CreateForm';
-import StandardTable from './components/StandardTable';
-import UpdateForm from './components/UpdateForm';
 import styles from './style.less';
+
 const FormItem = Form.Item;
 const { Option } = Select;
+const { RangePicker } = DatePicker;
+const { TextArea } = Input;
 
-const getValue = obj =>
-  Object.keys(obj)
-    .map(key => obj[key])
-    .join(',');
-
-const statusMap = ['default', 'processing', 'success', 'error'];
-const status = ['关闭', '运行中', '已上线', '异常'];
-
-/* eslint react/no-multi-comp:0 */
-@connect(({ listAndtableList, loading }) => ({
-  listAndtableList,
-  loading: loading.models.listAndtableList,
-}))
-class TableList extends Component {
-  state = {
-    modalVisible: false,
-    updateModalVisible: false,
-    expandForm: false,
-    selectedRows: [],
-    formValues: {},
-    stepFormValues: {},
-  };
-  columns = [
-    {
-      title: '编号',
-      dataIndex: 'id',
-    },
-    {
-      title: '用户名',
-      dataIndex: 'nickName',
-    },
-    {
-      title: '头像',
-      dataIndex: 'avatarUrl',
-      render(val) {
-        return <Avatar size="large" src={val} icon="user" />;
-      },
-    },
-    {
-      title: '省份',
-      dataIndex: 'province',
-    },
-    {
-      title: '城市',
-      dataIndex: 'city',
-    },
-    // {
-    //   title: '状态',
-    //   dataIndex: 'status',
-    //   filters: [
-    //     {
-    //       text: status[0],
-    //       value: '0',
-    //     },
-    //     {
-    //       text: status[1],
-    //       value: '1',
-    //     },
-    //     {
-    //       text: status[2],
-    //       value: '2',
-    //     },
-    //     {
-    //       text: status[3],
-    //       value: '3',
-    //     },
-    //   ],
-
-    //   render(val) {
-    //     return <Badge status={statusMap[val]} text={status[val]} />;
-    //   },
-    // },
-    {
-      title: '注册时间',
-      dataIndex: 'created_at',
-      // sorter: true,
-    },
-    {
-      title: '操作',
-      render: (text, record) => (
-        <Fragment>
-          <a onClick={() => this.handleUpdateModalVisible(true, record)}>配置</a>
-          <Divider type="vertical" />
-          <a href="">订阅警报</a>
-        </Fragment>
-      ),
-    },
-  ];
-
-  componentDidMount() {
-    const { dispatch } = this.props;
-    dispatch({
-      type: 'articleCreate/fetch',
-    });
+function beforeUpload(file) {
+  const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
+  if (!isJpgOrPng) {
+    message.error('You can only upload JPG/PNG file!');
   }
+  const isLt2M = file.size / 1024 / 1024 < 2;
+  if (!isLt2M) {
+    message.error('Image must smaller than 2MB!');
+  }
+  return isJpgOrPng && isLt2M;
+}
 
-  handleStandardTableChange = (pagination, filtersArg, sorter) => {
-    const { dispatch } = this.props;
-    const { formValues } = this.state;
-    const filters = Object.keys(filtersArg).reduce((obj, key) => {
-      const newObj = { ...obj };
-      newObj[key] = getValue(filtersArg[key]);
-      return newObj;
-    }, {});
-    const params = {
-      currentPage: pagination.current,
-      pageSize: pagination.pageSize,
-      ...formValues,
-      ...filters,
-    };
+@connect(({ articleForm, loading }) => ({
+  articleForm,
+  loading: loading.models.articleForm,
+  articleData: articleForm.articleData
+}))
 
-    if (sorter.field) {
-      params.sorter = `${sorter.field}_${sorter.order}`;
+class ArticleCreateForm extends Component {
+  state = {
+    editorState: BraftEditor.createEditorState(''),
+  };
+  componentDidMount() {
+    this.isLivinig = true;
+    const id = this.props.location.query.id;
+    if (id) {
+      const { dispatch } = this.props;
+      dispatch({
+        type: 'articleForm/fetch',
+        payload: {id},
+      });
     }
 
-    dispatch({
-      type: 'articleCreate/fetch',
-      payload: params,
-    });
-  };
-  handleFormReset = () => {
-    const { form, dispatch } = this.props;
-    form.resetFields();
-    this.setState({
-      formValues: {},
-    });
-    dispatch({
-      type: 'articleCreate/fetch',
-      payload: {},
-    });
-  };
-  toggleForm = () => {
-    const { expandForm } = this.state;
-    this.setState({
-      expandForm: !expandForm,
-    });
-  };
-  handleMenuClick = e => {
-    const { dispatch } = this.props;
-    const { selectedRows } = this.state;
-    if (!selectedRows) return;
+    // 3秒后更改编辑器内容
+    setTimeout(this.setEditorContentAsync, 3000);
+  }
+  componentWillUnmount() {
+    this.isLivinig = false;
+  }
 
-    switch (e.key) {
-      case 'remove':
+  handleSubmit = e => {
+    const { dispatch, form } = this.props;
+    e.preventDefault();
+    form.validateFieldsAndScroll((err, values) => {
+      if (!err) {
         dispatch({
-          type: 'articleCreate/remove',
+          type: 'articleForm/submitForm',
           payload: {
-            key: selectedRows.map(row => row.key),
-          },
-          callback: () => {
-            this.setState({
-              selectedRows: [],
-            });
+            ...values,
+            content: values.content.toHTML(),
           },
         });
-        break;
+      }
+    });
+  };
 
-      default:
-        break;
+  handleChange = info => {
+    if (info.file.status === 'uploading') {
+      this.setState({ loading: true });
+      return;
+    }
+    if (info.file.status === 'done') {
+      // Get this url from response in real world.
+      getBase64(info.file.originFileObj, imageUrl =>
+        this.setState({
+          imageUrl,
+          loading: false,
+        }),
+      );
     }
   };
-  handleSelectRows = rows => {
-    this.setState({
-      selectedRows: rows,
-    });
-  };
-  handleSearch = e => {
-    e.preventDefault();
-    const { dispatch, form } = this.props;
-    form.validateFields((err, fieldsValue) => {
-      if (err) return;
-      const values = {
-        ...fieldsValue,
-        updatedAt: fieldsValue.updatedAt && fieldsValue.updatedAt.valueOf(),
-      };
-      this.setState({
-        formValues: values,
-      });
-      dispatch({
-        type: 'articleCreate/fetch',
-        payload: values,
-      });
-    });
-  };
-  handleModalVisible = flag => {
-    this.setState({
-      modalVisible: !!flag,
-    });
-  };
-  handleUpdateModalVisible = (flag, record) => {
-    this.setState({
-      updateModalVisible: !!flag,
-      stepFormValues: record || {},
-    });
-  };
-  handleAdd = fields => {
-    const { dispatch } = this.props;
-    dispatch({
-      type: 'articleCreate/add',
-      payload: {
-        desc: fields.desc,
-      },
-    });
-    message.success('添加成功');
-    this.handleModalVisible();
-  };
-  handleUpdate = fields => {
-    const { dispatch } = this.props;
-    dispatch({
-      type: 'articleCreate/update',
-      payload: {
-        name: fields.name,
-        desc: fields.desc,
-        key: fields.key,
-      },
-    });
-    message.success('配置成功');
-    this.handleUpdateModalVisible();
-  };
 
-  renderSimpleForm() {
-    const { form } = this.props;
-    const { getFieldDecorator } = form;
-    return (
-      <Form onSubmit={this.handleSearch} layout="inline">
-        <Row
-          gutter={{
-            md: 8,
-            lg: 24,
-            xl: 48,
-          }}
-        >
-          <Col md={8} sm={24}>
-            <FormItem label="规则名称">
-              {getFieldDecorator('name')(<Input placeholder="请输入" />)}
-            </FormItem>
-          </Col>
-          <Col md={8} sm={24}>
-            <FormItem label="使用状态">
-              {getFieldDecorator('status')(
-                <Select
-                  placeholder="请选择"
-                  style={{
-                    width: '100%',
-                  }}
-                >
-                  <Option value="0">关闭</Option>
-                  <Option value="1">运行中</Option>
-                </Select>,
-              )}
-            </FormItem>
-          </Col>
-          <Col md={8} sm={24}>
-            <span className={styles.submitButtons}>
-              <Button type="primary" htmlType="submit">
-                查询
-              </Button>
-              <Button
-                style={{
-                  marginLeft: 8,
-                }}
-                onClick={this.handleFormReset}
-              >
-                重置
-              </Button>
-              <a
-                style={{
-                  marginLeft: 8,
-                }}
-                onClick={this.toggleForm}
-              >
-                展开 <Icon type="down" />
-              </a>
-            </span>
-          </Col>
-        </Row>
-      </Form>
-    );
-  }
-
-  renderAdvancedForm() {
-    const {
-      form: { getFieldDecorator },
-    } = this.props;
-    return (
-      <Form onSubmit={this.handleSearch} layout="inline">
-        <Row
-          gutter={{
-            md: 8,
-            lg: 24,
-            xl: 48,
-          }}
-        >
-          <Col md={8} sm={24}>
-            <FormItem label="规则名称">
-              {getFieldDecorator('name')(<Input placeholder="请输入" />)}
-            </FormItem>
-          </Col>
-          <Col md={8} sm={24}>
-            <FormItem label="使用状态">
-              {getFieldDecorator('status')(
-                <Select
-                  placeholder="请选择"
-                  style={{
-                    width: '100%',
-                  }}
-                >
-                  <Option value="0">关闭</Option>
-                  <Option value="1">运行中</Option>
-                </Select>,
-              )}
-            </FormItem>
-          </Col>
-          <Col md={8} sm={24}>
-            <FormItem label="调用次数">
-              {getFieldDecorator('number')(
-                <InputNumber
-                  style={{
-                    width: '100%',
-                  }}
-                />,
-              )}
-            </FormItem>
-          </Col>
-        </Row>
-        <Row
-          gutter={{
-            md: 8,
-            lg: 24,
-            xl: 48,
-          }}
-        >
-          <Col md={8} sm={24}>
-            <FormItem label="更新日期">
-              {getFieldDecorator('date')(
-                <DatePicker
-                  style={{
-                    width: '100%',
-                  }}
-                  placeholder="请输入更新日期"
-                />,
-              )}
-            </FormItem>
-          </Col>
-          <Col md={8} sm={24}>
-            <FormItem label="使用状态">
-              {getFieldDecorator('status3')(
-                <Select
-                  placeholder="请选择"
-                  style={{
-                    width: '100%',
-                  }}
-                >
-                  <Option value="0">关闭</Option>
-                  <Option value="1">运行中</Option>
-                </Select>,
-              )}
-            </FormItem>
-          </Col>
-          <Col md={8} sm={24}>
-            <FormItem label="使用状态">
-              {getFieldDecorator('status4')(
-                <Select
-                  placeholder="请选择"
-                  style={{
-                    width: '100%',
-                  }}
-                >
-                  <Option value="0">关闭</Option>
-                  <Option value="1">运行中</Option>
-                </Select>,
-              )}
-            </FormItem>
-          </Col>
-        </Row>
-        <div
-          style={{
-            overflow: 'hidden',
-          }}
-        >
-          <div
-            style={{
-              float: 'right',
-              marginBottom: 24,
-            }}
-          >
-            <Button type="primary" htmlType="submit">
-              查询
-            </Button>
-            <Button
-              style={{
-                marginLeft: 8,
-              }}
-              onClick={this.handleFormReset}
-            >
-              重置
-            </Button>
-            <a
-              style={{
-                marginLeft: 8,
-              }}
-              onClick={this.toggleForm}
-            >
-              收起 <Icon type="up" />
-            </a>
-          </div>
-        </div>
-      </Form>
-    );
-  }
-
-  renderForm() {
-    const { expandForm } = this.state;
-    return expandForm ? this.renderAdvancedForm() : this.renderSimpleForm();
+  handleEditChange = editorState => {
+    this.setState({
+      editorState: editorState,
+    });
+  };
+  handleSelectChange(value) {
+    console.log(`selected ${value}`);
   }
 
   render() {
+    const { submitting, articleData } = this.props;
     const {
-      listAndtableList: { data },
-      loading,
+      form: { getFieldDecorator, getFieldValue },
     } = this.props;
-    const { selectedRows, modalVisible, updateModalVisible, stepFormValues } = this.state;
-    const menu = (
-      <Menu onClick={this.handleMenuClick} selectedKeys={[]}>
-        <Menu.Item key="remove">删除</Menu.Item>
-        <Menu.Item key="approval">批量审批</Menu.Item>
-      </Menu>
-    );
-    const parentMethods = {
-      handleAdd: this.handleAdd,
-      handleModalVisible: this.handleModalVisible,
+    const formItemLayout = {
+      labelCol: {
+        xs: { span: 24 },
+        sm: { span: 2 },
+      },
+      wrapperCol: {
+        xs: { span: 24 },
+        sm: { span: 12 },
+        md: { span: 10 },
+      },
     };
-    const updateMethods = {
-      handleUpdateModalVisible: this.handleUpdateModalVisible,
-      handleUpdate: this.handleUpdate,
+    const formItemLayout2 = {
+      labelCol: {
+        sm: { span: 2 },
+      },
+      wrapperCol: {
+        sm: { span: 22 },
+      },
     };
+    const submitFormLayout = {
+      wrapperCol: {
+        xs: {
+          span: 24,
+          offset: 0,
+        },
+        sm: {
+          span: 10,
+          offset: 2,
+        },
+      },
+    };
+    // 编辑器模块
+    const excludeControls = [
+      'letter-spacing',
+      'line-height',
+      'clear',
+      'headings',
+      'list-ol',
+      'list-ul',
+      'remove-styles',
+      'superscript',
+      'subscript',
+      'hr',
+      'text-align',
+    ];
     return (
       <PageHeaderWrapper>
         <Card bordered={false}>
-          <div className={styles.tableList}>
-            <div className={styles.tableListForm}>{this.renderForm()}</div>
-            <div className={styles.tableListOperator}>
-              <Button icon="plus" type="primary" onClick={() => this.handleModalVisible(true)}>
-                新建
-              </Button>
-              {selectedRows.length > 0 && (
-                <span>
-                  <Button>批量操作</Button>
-                  <Dropdown overlay={menu}>
-                    <Button>
-                      更多操作 <Icon type="down" />
-                    </Button>
-                  </Dropdown>
-                </span>
+          <Form
+            onSubmit={this.handleSubmit}
+            hideRequiredMark
+            style={{
+              marginTop: 8,
+            }}
+          >
+            <FormItem {...formItemLayout} label="标题">
+              {getFieldDecorator('title', {
+                rules: [
+                  {
+                    required: true,
+                    message: '文章标题不能为空',
+                  },
+                ],
+              })(<Input placeholder="请输入文章标题" />)}
+            </FormItem>
+            <FormItem {...formItemLayout} label="封面图">
+              <Upload
+                name={'file'}
+                listType="picture-card"
+                className="avatar-uploader"
+                showUploadList={false}
+                action={'/api/admin/file/upload'}
+                beforeUpload={beforeUpload}
+                onChange={this.handleChange}
+              >
+                <div>
+                  <Icon type="plus" />
+                  <div className="ant-upload-text">上传图片</div>
+                </div>
+              </Upload>
+            </FormItem>
+            <FormItem {...formItemLayout} label="分类">
+              {getFieldDecorator('classify', {
+                rules: [
+                  {
+                    required: true,
+                    message: '文章分类不能为空',
+                  },
+                ],
+              })(
+                <Select placeholder="请选择文章分类">
+                  <Option value="jack">Jack</Option>
+                  <Option value="lucy">Lucy</Option>
+                </Select>,
               )}
-            </div>
-            <StandardTable
-              selectedRows={selectedRows}
-              loading={loading}
-              data={data}
-              columns={this.columns}
-              onSelectRow={this.handleSelectRows}
-              onChange={this.handleStandardTableChange}
-            />
-          </div>
+            </FormItem>
+            <FormItem {...formItemLayout} label="描述">
+              {getFieldDecorator('desc')(
+                <TextArea
+                  style={{
+                    minHeight: 24,
+                  }}
+                  placeholder="请输入文章描述"
+                  rows={3}
+                />,
+              )}
+            </FormItem>
+            <FormItem {...formItemLayout} label="商品编号">
+              {getFieldDecorator('good_id')(<Input placeholder="请输入推荐的商品编号" />)}
+            </FormItem>
+            {/* headers={{ authorization: 'Bearer ' + sessionStorage['token'] }} */}
+
+            <FormItem {...formItemLayout2} label="文章详情">
+              <div style={{ border: '1px solid #ccc' }}>
+                {getFieldDecorator('content', {
+                  validateTrigger: 'onBlur',
+                  rules: [
+                    {
+                      required: true,
+                      validator: (_, value, callback) => {
+                        if (value.isEmpty()) {
+                          callback('请输入正文内容');
+                        } else {
+                          callback();
+                        }
+                      },
+                    },
+                  ],
+                })(<BraftEditor excludeControls={excludeControls} placeholder="请输入正文内容" />)}
+              </div>
+            </FormItem>
+            <FormItem {...formItemLayout} label="创建时间">
+              {getFieldDecorator('created_at')(
+                <DatePicker showTime placeholder="请选择创建时间" />,
+              )}
+            </FormItem>
+            <FormItem {...formItemLayout} label="状态">
+              {getFieldDecorator('deleted_at')(
+                <Switch checkedChildren="正常" unCheckedChildren="下架" defaultChecked />,
+              )}
+            </FormItem>
+            <FormItem
+              {...submitFormLayout}
+              style={{
+                marginTop: 32,
+              }}
+            >
+              <Button type="primary" htmlType="submit" loading={submitting}>
+                提交
+              </Button>
+              <Button style={{ marginLeft: 8 }}>保存</Button>
+            </FormItem>
+          </Form>
         </Card>
-        <CreateForm {...parentMethods} modalVisible={modalVisible} />
-        {stepFormValues && Object.keys(stepFormValues).length ? (
-          <UpdateForm
-            {...updateMethods}
-            updateModalVisible={updateModalVisible}
-            values={stepFormValues}
-          />
-        ) : null}
       </PageHeaderWrapper>
     );
   }
 }
 
-export default Form.create()(TableList);
+export default Form.create()(ArticleCreateForm);

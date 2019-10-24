@@ -141,6 +141,13 @@ export default {
                   path: '/article/create',
                   component: './article/create',
                 },
+                {
+                  name: '编辑文章',
+                  icon: 'smile',
+                  path: '/article/edit',
+                  component: './article/create',
+                  hideInMenu: true,
+                },
               ],
             },
             {

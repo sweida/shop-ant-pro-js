@@ -3,7 +3,7 @@ import React from 'react';
 import { connect } from 'dva';
 import Avatar from './AvatarDropdown';
 import HeaderSearch from '../HeaderSearch';
-import SelectLang from '../SelectLang';
+// import SelectLang from '../SelectLang';
 import styles from './index.less';
 import NoticeIconView from './NoticeIconView';
 
@@ -20,7 +20,7 @@ const GlobalHeaderRight = props => {
       <HeaderSearch
         className={`${styles.action} ${styles.search}`}
         placeholder="站内搜索"
-        defaultValue="umi ui"
+        defaultValue=""
         dataSource={['搜索提示一', '搜索提示二', '搜索提示三']}
         onSearch={value => {
           console.log('input', value);
@@ -29,7 +29,7 @@ const GlobalHeaderRight = props => {
           console.log('enter', value);
         }}
       />
-      <Tooltip title="使用文档">
+      {/* <Tooltip title="使用文档">
         <a
           target="_blank"
           href="https://pro.ant.design/docs/getting-started"
@@ -38,10 +38,10 @@ const GlobalHeaderRight = props => {
         >
           <Icon type="question-circle-o" />
         </a>
-      </Tooltip>
+      </Tooltip> */}
       <NoticeIconView />
       <Avatar menu />
-      <SelectLang className={styles.action} />
+      {/* <SelectLang className={styles.action} /> */}
     </div>
   );
 };

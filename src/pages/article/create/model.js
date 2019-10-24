@@ -1,63 +1,34 @@
-import { addRule, queryUser, removeRule, updateRule } from './service';
+import { message } from 'antd';
+import { articleCreate, articleDetail } from './service';
+import router from 'umi/router'
 
 const Model = {
-  namespace: 'goodsCreate',
+  namespace: 'articleForm',
   state: {
-    data: {
-      list: [],
-      pagination: {},
-    },
+    articleData: {}
   },
   effects: {
     *fetch({ payload }, { call, put }) {
-      const response = yield call(queryUser, payload);
+      const response = yield call(articleDetail, payload);
       yield put({
-        type: 'save',
-        payload: response.data,
+        type: 'detail',
+        payload: response,
       });
       console.log(response);
-      
     },
-
-    *add({ payload, callback }, { call, put }) {
-      const response = yield call(addRule, payload);
-      yield put({
-        type: 'save',
-        payload: response,
-      });
-      if (callback) callback();
-    },
-
-    *remove({ payload, callback }, { call, put }) {
-      const response = yield call(removeRule, payload);
-      yield put({
-        type: 'save',
-        payload: response,
-      });
-      if (callback) callback();
-    },
-
-    *update({ payload, callback }, { call, put }) {
-      const response = yield call(updateRule, payload);
-      yield put({
-        type: 'save',
-        payload: response,
-      });
-      if (callback) callback();
+    *submitForm({ payload }, { call }) {
+      yield call(articleCreate, payload);
+      message.success('文章新增成功！');
+      setTimeout(() => {
+        router.push('/article/list');
+      }, 300);
     },
   },
   reducers: {
-    save(state, action) {
+    detail(state, action) {
       return {
         ...state,
-        data: {
-          list: action.payload.data,
-          pagination: {
-            total: action.payload.total,
-            pageSize: 10,
-            current: action.payload.current_page
-          }
-        },
+        articleData: action,
       };
     },
   },
