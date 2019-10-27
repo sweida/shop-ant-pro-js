@@ -78,7 +78,6 @@ class StandardTable extends Component {
       <div className={styles.standardTable}>
         <Table
           rowKey={rowKey || 'key'}
-          rowSelection={rowSelection}
           dataSource={list}
           pagination={paginationProps}
           onChange={this.handleTableChange}

@@ -3,14 +3,12 @@ import React from 'react';
 const FormItem = Form.Item;
 
 const CreateForm = props => {
-  const { modalVisible, form, handleAdd, handleModalVisible, classifys } = props;
+  const { modalVisible, form, handleAdd, handleModalVisible } = props;
 
   const okHandle = () => {
     form.validateFields((err, fieldsValue) => {
       if (err) return;
-      form.resetFields();
       handleAdd(fieldsValue);
-      console.log(classifys, fieldsValue, 2222);
     });
     
   };
@@ -18,7 +16,7 @@ const CreateForm = props => {
   return (
     <Modal
       destroyOnClose
-      title="新建分类"
+      title="新增分类"
       visible={modalVisible}
       onOk={okHandle}
       onCancel={() => handleModalVisible()}
@@ -39,7 +37,7 @@ const CreateForm = props => {
               message: '请输入分类名称'
             },
           ],
-        })(<Input placeholder="请不要输入已经存在的分类" />)}
+        })(<Input placeholder="请不要添加已经存在的分类" />)}
       </FormItem>
     </Modal>
   );
