@@ -6,12 +6,21 @@ export async function queryAdmin(params) {
     params,
   });
 }
-export async function removeRule(params) {
-  return request('/api/rule', {
+
+export async function deleteOrRestored(params) {
+  return request('/api/admin/deleteOrRestored', {
     method: 'POST',
-    data: { ...params, method: 'delete' },
+    params,
   });
 }
+
+export async function reallyDelete(params) {
+  return request('/api/admin/reallyDelete', {
+    method: 'POST',
+    params,
+  });
+}
+
 export async function addRule(params) {
   return request('/api/rule', {
     method: 'POST',

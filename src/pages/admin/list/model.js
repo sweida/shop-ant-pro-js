@@ -1,4 +1,4 @@
-import { addRule, queryAdmin, removeRule, updateRule } from './service';
+import { addRule, queryAdmin, deleteOrRestored, updateRule } from './service';
 
 const Model = {
   namespace: 'adminList',
@@ -16,9 +16,10 @@ const Model = {
         payload: response.data,
       });
       console.log(response);
-      
     },
-
+    // *deleteOrRestoredAdmin({ }, { call, put }) {
+    //   yield call(deleteOrRestored);
+    // },
     *add({ payload, callback }, { call, put }) {
       const response = yield call(addRule, payload);
       yield put({
@@ -55,11 +56,24 @@ const Model = {
           pagination: {
             total: action.payload.total,
             pageSize: 10,
-            current: action.payload.current_page
-          }
+            current: action.payload.current_page,
+          },
         },
       };
     },
+    // deleteOrRestored(state, action) {
+    //   return {
+    //     ...state,
+    //     data: {
+    //       list: action.payload.data,
+    //       pagination: {
+    //         total: action.payload.total,
+    //         pageSize: 10,
+    //         current: action.payload.current_page,
+    //       },
+    //     },
+    //   };
+    // }
   },
 };
 export default Model;

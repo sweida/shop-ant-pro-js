@@ -13,13 +13,17 @@ import {
   Menu,
   Row,
   Select,
+  Table,
+  Tag,
   message,
   Avatar,
+  Popconfirm,
 } from 'antd';
 import React, { Component, Fragment } from 'react';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import { connect } from 'dva';
 import moment from 'moment';
+import { deleteOrRestored, reallyDelete } from './service';
 import CreateForm from './components/CreateForm';
 import StandardTable from './components/StandardTable';
 import UpdateForm from './components/UpdateForm';
@@ -51,12 +55,16 @@ class AdminList extends Component {
   };
   columns = [
     {
-      title: '编号',
+      title: 'ID',
       dataIndex: 'id',
     },
     {
-      title: '用户名',
-      dataIndex: 'nickName',
+      title: '名称',
+      dataIndex: 'name',
+    },
+    {
+      title: '邮箱',
+      dataIndex: 'email',
     },
     {
       title: '头像',
@@ -66,51 +74,34 @@ class AdminList extends Component {
       },
     },
     {
-      title: '省份',
-      dataIndex: 'province',
+      title: '状态',
+      dataIndex: 'deleted_at',
+      render(val) {
+        return val ? <Tag color="red">禁用</Tag> : <Tag color="blue">正常</Tag>;
+      },
     },
     {
-      title: '城市',
-      dataIndex: 'city',
-    },
-    // {
-    //   title: '状态',
-    //   dataIndex: 'status',
-    //   filters: [
-    //     {
-    //       text: status[0],
-    //       value: '0',
-    //     },
-    //     {
-    //       text: status[1],
-    //       value: '1',
-    //     },
-    //     {
-    //       text: status[2],
-    //       value: '2',
-    //     },
-    //     {
-    //       text: status[3],
-    //       value: '3',
-    //     },
-    //   ],
-
-    //   render(val) {
-    //     return <Badge status={statusMap[val]} text={status[val]} />;
-    //   },
-    // },
-    {
-      title: '注册时间',
-      dataIndex: 'created_at',
-      // sorter: true,
+      title: '最后登录时间',
+      dataIndex: 'updated_at',
     },
     {
       title: '操作',
-      render: (text, record) => (
+      render: (text, row) => (
         <Fragment>
-          <a onClick={() => this.handleUpdateModalVisible(true, record)}>配置</a>
+          <a onClick={() => this.handleDeleteOrRestored(row.id)}>
+            {row.deleted_at ? '启用' : '禁用'}
+          </a>
           <Divider type="vertical" />
-          <a href="">订阅警报</a>
+          <Popconfirm
+            title="确定重置密码？密码将发送到您注册的邮件"
+            onConfirm={() => this.handleResetPassword()}
+          >
+            <a href="#">重置密码</a>
+          </Popconfirm>
+          <Divider type="vertical" />
+          <Popconfirm title="确定删除吗？" onConfirm={() => this.handleReallyDelete(row.id)}>
+            <a href="#">删除</a>
+          </Popconfirm>
         </Fragment>
       ),
     },
@@ -120,6 +111,30 @@ class AdminList extends Component {
     const { dispatch } = this.props;
     dispatch({
       type: 'adminList/fetch',
+    });
+  }
+  handleResetPassword() {}
+
+  handleDeleteOrRestored(id) {
+    deleteOrRestored({ id }).then(res => {
+      if (res.status == 'success') {
+        message.success(res.message);
+        const { dispatch } = this.props;
+        dispatch({
+          type: 'adminList/fetch',
+        });
+      }
+    });
+  }
+  handleReallyDelete(id) {
+    reallyDelete({ id }).then(res => {
+      if (res.status == 'success') {
+        message.success(res.message);
+        const { dispatch } = this.props;
+        dispatch({
+          type: 'adminList/fetch',
+        });
+      }
     });
   }
 
@@ -448,13 +463,7 @@ class AdminList extends Component {
       adminList: { data },
       loading,
     } = this.props;
-    const { selectedRows, modalVisible, updateModalVisible, stepFormValues } = this.state;
-    const menu = (
-      <Menu onClick={this.handleMenuClick} selectedKeys={[]}>
-        <Menu.Item key="remove">删除</Menu.Item>
-        <Menu.Item key="approval">批量审批</Menu.Item>
-      </Menu>
-    );
+    const { modalVisible, updateModalVisible, stepFormValues } = this.state;
     const parentMethods = {
       handleAdd: this.handleAdd,
       handleModalVisible: this.handleModalVisible,
@@ -470,27 +479,20 @@ class AdminList extends Component {
             <div className={styles.tableListForm}>{this.renderForm()}</div>
             <div className={styles.tableListOperator}>
               <Button icon="plus" type="primary" onClick={() => this.handleModalVisible(true)}>
-                新建
+                新建管理员
               </Button>
-              {selectedRows.length > 0 && (
-                <span>
-                  <Button>批量操作</Button>
-                  <Dropdown overlay={menu}>
-                    <Button>
-                      更多操作 <Icon type="down" />
-                    </Button>
-                  </Dropdown>
-                </span>
-              )}
             </div>
+            {/* <Table
+              loading={loading}
+              rowKey={data => data.id}
+              dataSource={data}
+              columns={this.columns}
+            /> */}
             <StandardTable
-              selectedRows={selectedRows}
               loading={loading}
               data={data}
               rowKey={data => data.id}
               columns={this.columns}
-              onSelectRow={this.handleSelectRows}
-              onChange={this.handleStandardTableChange}
             />
           </div>
         </Card>
