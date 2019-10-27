@@ -1,63 +1,45 @@
-import { addRule, queryUser, removeRule, updateRule } from './service';
+import { message } from 'antd';
+import { goodsCreate, goodsEdit, goodsDetail } from './service';
+import router from 'umi/router'
 
 const Model = {
-  namespace: 'articleCreate',
+  namespace: 'goodsForm',
   state: {
-    data: {
-      list: [],
-      pagination: {},
-    },
+    goodsData: {},
   },
   effects: {
-    *fetch({ payload }, { call, put }) {
-      const response = yield call(queryUser, payload);
+    *fetch({ payload, callback }, { call, put }) {
+      const response = yield call(goodsDetail, payload);
       yield put({
-        type: 'save',
+        type: 'detail',
         payload: response.data,
       });
-      console.log(response);
-      
+      if (callback) callback(response.data);
     },
-
-    *add({ payload, callback }, { call, put }) {
-      const response = yield call(addRule, payload);
-      yield put({
-        type: 'save',
-        payload: response,
-      });
-      if (callback) callback();
+    *submitForm({ payload }, { call }) {
+      yield call(goodsCreate, payload);
+      message.success('商品新增成功！');
+      setTimeout(() => {
+        router.push('/goods/list');
+      }, 300);
     },
-
-    *remove({ payload, callback }, { call, put }) {
-      const response = yield call(removeRule, payload);
-      yield put({
-        type: 'save',
-        payload: response,
-      });
-      if (callback) callback();
-    },
-
-    *update({ payload, callback }, { call, put }) {
-      const response = yield call(updateRule, payload);
-      yield put({
-        type: 'save',
-        payload: response,
-      });
-      if (callback) callback();
+    *saveForm({ payload }, { call }) {
+      const res = yield call(goodsEdit, payload);
+      if (res.status=='success'){
+        message.success('商品修改成功！');
+        setTimeout(() => {
+          router.push('/goods/list');
+        }, 300);
+      } else {
+        message.error(res.message);
+      }
     },
   },
   reducers: {
-    save(state, action) {
+    detail(state, action) {
       return {
         ...state,
-        data: {
-          list: action.payload.data,
-          pagination: {
-            total: action.payload.total,
-            pageSize: 10,
-            current: action.payload.current_page
-          }
-        },
+        goodsData: action,
       };
     },
   },

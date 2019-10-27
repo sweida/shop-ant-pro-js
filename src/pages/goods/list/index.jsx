@@ -16,11 +16,13 @@ import {
   Select,
   message,
   Avatar,
+  Popconfirm,
 } from 'antd';
 import React, { Component, Fragment } from 'react';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import { connect } from 'dva';
-import moment from 'moment';
+import Link from 'umi/link'
+import router from 'umi/router';
 import CreateForm from './components/CreateForm';
 import StandardTable from './components/StandardTable';
 import UpdateForm from './components/UpdateForm';
@@ -91,11 +93,13 @@ class GoodsTableList extends Component {
     },
     {
       title: '操作',
-      render: (text, record) => (
+      render: (text, row) => (
         <Fragment>
-          <a onClick={() => this.handleUpdateModalVisible(true, record)}>配置</a>
+          <Link to={'edit?id=' + row.id}>编辑</Link>
           <Divider type="vertical" />
-          <a href="">订阅警报</a>
+          <Popconfirm title="确定删除吗？" onConfirm={() => this.handleDelete()}>
+            <a href="#">删除</a>
+          </Popconfirm>
         </Fragment>
       ),
     },
@@ -106,6 +110,9 @@ class GoodsTableList extends Component {
     dispatch({
       type: 'goodsList/fetch',
     });
+  }
+  handleDelete() {
+    console.log('删除');
   }
 
   handleStandardTableChange = (pagination, filtersArg, sorter) => {
@@ -454,8 +461,8 @@ class GoodsTableList extends Component {
           <div className={styles.tableList}>
             <div className={styles.tableListForm}>{this.renderForm()}</div>
             <div className={styles.tableListOperator}>
-              <Button icon="plus" type="primary" onClick={() => this.handleModalVisible(true)}>
-                添加商品
+              <Button icon="plus" type="primary" onClick={() => router.push('create')}>
+                新增商品
               </Button>
               {selectedRows.length > 0 && (
                 <span>

@@ -462,7 +462,7 @@ class ArticlesTableList extends Component {
           <div className={styles.tableList}>
             <div className={styles.tableListForm}>{this.renderForm()}</div>
             <div className={styles.tableListOperator}>
-              <Button icon="plus" type="primary" onClick={() => router.push('/article/create')}>
+              <Button icon="plus" type="primary" onClick={() => router.push('create')}>
                 新增文章
               </Button>
               {selectedRows.length > 0 && (

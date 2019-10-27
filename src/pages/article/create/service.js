@@ -14,6 +14,10 @@ export async function articleDetail(params) {
   });
 }
 
+export async function articleClassifys() {
+  return request('/api/article/classifys');
+}
+
 export async function articleEdit(params) {
   return request('/api/article/edit', {
     method: 'POST',

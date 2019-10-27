@@ -131,19 +131,16 @@ export default {
               routes: [
                 {
                   name: '文章列表',
-                  icon: 'smile',
                   path: '/article/list',
                   component: './article/list',
                 },
                 {
                   name: '发布文章',
-                  icon: 'smile',
                   path: '/article/create',
                   component: './article/create',
                 },
                 {
                   name: '编辑文章',
-                  icon: 'smile',
                   path: '/article/edit',
                   component: './article/create',
                   hideInMenu: true,
@@ -157,15 +154,19 @@ export default {
               routes: [
                 {
                   name: '商品列表',
-                  icon: 'smile',
                   path: '/goods/list',
                   component: './goods/list',
                 },
                 {
                   name: '添加商品',
-                  icon: 'smile',
                   path: '/goods/create',
                   component: './goods/create',
+                },
+                {
+                  name: '编辑商品',
+                  path: '/goods/edit',
+                  component: './goods/create',
+                  hideInMenu: true,
                 },
               ],
             },
@@ -176,16 +177,14 @@ export default {
               routes: [
                 {
                   name: '订单列表',
-                  icon: 'smile',
                   path: '/order/list',
                   component: './order/list',
                 },
                 {
                   name: '订单详情',
-                  icon: 'smile',
                   path: '/order/detail',
                   component: './order/detail',
-                  hideInMenu: true
+                  hideInMenu: true,
                 },
               ],
             },

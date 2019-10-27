@@ -8,14 +8,18 @@ import {
   Input,
   Switch,
   InputNumber,
+  message,
   Radio,
   Select,
   Tooltip,
-  Spin
+  Spin,
+  Row,
+  Col
 } from 'antd';
 import React, { Component } from 'react';
 import moment from 'moment';
 import Link from 'umi/link'
+import CreateForm from './components/CreateForm';
 import 'braft-editor/dist/index.css';
 import BraftEditor from 'braft-editor';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
@@ -41,34 +45,37 @@ function beforeUpload(file) {
 
 @connect(({ articleForm, loading }) => ({
   articleForm,
-  loading: loading.models.articleForm,
-  articleData: articleForm.articleData,
+  loading: loading.models.articleForm
 }))
-
 class ArticleCreateForm extends Component {
-  componentDidMount() {  
+  state = {
+    modalVisible: false,
+  };
+  componentDidMount() {
+    const { dispatch, form } = this.props;
+    dispatch({
+      type: 'articleForm/getClassifys'
+    });
+
     const id = this.props.location.query.id;
     if (id) {
-      const { dispatch, form } = this.props;
       dispatch({
         type: 'articleForm/fetch',
         payload: { id },
-        callback: (response) => {
-          this.setBaseInfo(response)
-        }
+        callback: response => {
+          this.setBaseInfo(response);
+        },
       });
     }
   }
-  componentWillUnmount() {
-
-  }
+  componentWillUnmount() {}
 
   // 是否编辑
   isEdit() {
-    return this.props.route.path == '/article/edit' ? true : false
+    return this.props.route.path == '/article/edit' ? true : false;
   }
 
-  setBaseInfo = (data) => {
+  setBaseInfo = data => {
     const { form } = this.props;
     Object.keys(form.getFieldsValue()).forEach(key => {
       const obj = {};
@@ -96,7 +103,7 @@ class ArticleCreateForm extends Component {
             },
           });
         }
-      })
+      });
     } else {
       // 新增
       form.validateFieldsAndScroll((err, values) => {
@@ -113,9 +120,25 @@ class ArticleCreateForm extends Component {
     }
   };
 
-  addArticle() {
-
-  }
+  addArticle() {}
+  // 添加新分类
+  handleModalVisible = flag => {
+    this.setState({
+      modalVisible: !!flag,
+    });
+  };
+  handleAdd = fields => {
+    const { dispatch, articleForm } = this.props;
+    const newData = [...articleForm.classifys, fields.newClassify];
+    dispatch({
+      type: 'articleForm/addClassifys',
+      payload: newData,
+    });
+    console.log(newData, articleForm.classifys, 23);
+    
+    message.success('添加成功');
+    this.handleModalVisible();
+  };
 
   handleChange = info => {
     if (info.file.status === 'uploading') {
@@ -133,13 +156,14 @@ class ArticleCreateForm extends Component {
     }
   };
 
-
   handleSelectChange(value) {
     console.log(`selected ${value}`);
   }
 
   render() {
-    const { submitting, loading } = this.props;
+    const { articleForm, submitting, loading } = this.props;
+    const { classifys } = articleForm;
+    const { modalVisible } = this.state;
     const {
       form: { getFieldDecorator, getFieldValue },
     } = this.props;
@@ -188,9 +212,13 @@ class ArticleCreateForm extends Component {
       'hr',
       'text-align',
     ];
+    const parentMethods = {
+      handleAdd: this.handleAdd,
+      handleModalVisible: this.handleModalVisible,
+    };
     const content = (
       <div className={styles.pageHeaderContent}>
-        <Link to="list" >返回列表</Link>
+        <Link to="list">返回列表</Link>
       </div>
     );
     return (
@@ -231,19 +259,29 @@ class ArticleCreateForm extends Component {
                 </Upload>
               </FormItem>
               <FormItem {...formItemLayout} label="分类">
-                {getFieldDecorator('classify', {
-                  rules: [
-                    {
-                      required: true,
-                      message: '文章分类不能为空',
-                    },
-                  ],
-                })(
-                  <Select placeholder="请选择文章分类">
-                    <Option value="jack">Jack</Option>
-                    <Option value="lucy">Lucy</Option>
-                  </Select>,
-                )}
+                <Row gutter={8}>
+                  <Col span={18}>
+                    {getFieldDecorator('classify', {
+                      rules: [
+                        {
+                          required: true,
+                          message: '文章分类不能为空',
+                        },
+                      ],
+                    })(
+                      <Select placeholder="请选择文章分类">
+                        {classifys.map(item => (
+                          <Option key={item}>{item}</Option>
+                        ))}
+                      </Select>,
+                    )}
+                  </Col>
+                  <Col span={6}>
+                    <Button type="primary" onClick={() => this.handleModalVisible(true)}>
+                      新增分类
+                    </Button>
+                  </Col>
+                </Row>
               </FormItem>
               <FormItem {...formItemLayout} label="描述">
                 {getFieldDecorator('desc')(
@@ -308,6 +346,7 @@ class ArticleCreateForm extends Component {
             </Form>
           </Card>
         </Spin>
+        <CreateForm {...parentMethods} modalVisible={modalVisible} classifys={classifys} />
       </PageHeaderWrapper>
     );
   }

@@ -1,8 +1,19 @@
-import { Badge, Card, Descriptions, Divider, Table } from 'antd';
-import React, { Component } from 'react';
-import { PageHeaderWrapper } from '@ant-design/pro-layout';
+import { 
+  Badge, 
+  Card, 
+  Descriptions, 
+  Divider, 
+  Icon, 
+  Steps, 
+  Statistic, 
+  Table } from 'antd';
+import React, { Component, Fragment } from 'react';
+import { PageHeaderWrapper, RouteContext } from '@ant-design/pro-layout';
 import { connect } from 'dva';
+import classNames from 'classnames';
 import styles from './style.less';
+
+const { Step } = Steps;
 const progressColumns = [
   {
     title: '时间',
@@ -37,6 +48,46 @@ const progressColumns = [
     key: 'cost',
   },
 ];
+
+// 订单信息
+const extra = (
+  <div className={styles.moreInfo}>
+    <Statistic title="状态" value="待付款" />
+    <Statistic title="订单金额" value={568.08} prefix="¥" />
+  </div>
+);
+const description = (
+  <RouteContext.Consumer>
+    {({ isMobile }) => (
+      <Descriptions className={styles.headerList} size="small" column={isMobile ? 1 : 2}>
+        <Descriptions.Item label="创建人">曲丽丽</Descriptions.Item>
+        <Descriptions.Item label="创建时间">2017-07-07 08:18:08</Descriptions.Item>
+        <Descriptions.Item label="商品数量">4</Descriptions.Item>
+        <Descriptions.Item label="商品金额">¥45.00</Descriptions.Item>
+        <Descriptions.Item label="折扣金额">无</Descriptions.Item>
+        <Descriptions.Item label="备注">加快</Descriptions.Item>
+      </Descriptions>
+    )}
+  </RouteContext.Consumer>
+);
+
+
+// 步骤
+const desc1 = (
+  <div className={classNames(styles.textSecondary, styles.stepDescription)}>
+    <div> 曲丽丽 </div>
+    <div>2016-12-12 12:32</div>
+  </div>
+);
+const desc2 = (
+  <div className={styles.stepDescription}>
+    <div> 周毛毛 </div>
+    <div>
+      <a href="">发货</a>
+    </div>
+  </div>
+);
+
 
 @connect(({ orderDetail, loading }) => ({
   orderDetail,
@@ -171,42 +222,46 @@ class Basic extends Component {
       },
     ];
     return (
-      <PageHeaderWrapper>
-        <Card bordered={false}>
-          <Descriptions
-            title="退款申请"
-            style={{
-              marginBottom: 32,
-            }}
-          >
-            <Descriptions.Item label="取货单号">1000000000</Descriptions.Item>
-            <Descriptions.Item label="状态">已取货</Descriptions.Item>
-            <Descriptions.Item label="销售单号">1234123421</Descriptions.Item>
-            <Descriptions.Item label="子订单">3214321432</Descriptions.Item>
-          </Descriptions>
-          <Divider
-            style={{
-              marginBottom: 32,
-            }}
-          />
-          <Descriptions
-            title="用户信息"
-            style={{
-              marginBottom: 32,
-            }}
-          >
+      <PageHeaderWrapper
+        title="单号：234231029431"
+        className={styles.pageHeader}
+        content={description}
+        extraContent={extra}
+      >
+        <Card
+          title="订单状态"
+          style={{
+            marginBottom: 24,
+          }}
+        >
+          <RouteContext.Consumer>
+            {({ isMobile }) => (
+              <Steps direction={isMobile ? 'vertical' : 'horizontal'} progressDot current={1}>
+                <Step title="创建订单" description={desc1} />
+                <Step title="已支付" description={desc2} />
+                <Step title="已发货" />
+                <Step title="已签收，待确定" />
+                <Step title="完成" />
+                {/* <Step title="已取消" /> */}
+              </Steps>
+            )}
+          </RouteContext.Consumer>
+        </Card>
+        <Card
+          title="收货信息"
+          style={{
+            marginBottom: 24,
+          }}
+        >
+          <Descriptions>
             <Descriptions.Item label="用户姓名">付小小</Descriptions.Item>
             <Descriptions.Item label="联系电话">18100000000</Descriptions.Item>
-            <Descriptions.Item label="常用快递">菜鸟仓储</Descriptions.Item>
-            <Descriptions.Item label="取货地址">浙江省杭州市西湖区万塘路18号</Descriptions.Item>
-            <Descriptions.Item label="备注">无</Descriptions.Item>
+            <Descriptions.Item label="收货地址">浙江省杭州市西湖区万塘路18号</Descriptions.Item>
+            <Descriptions.Item label="快递">菜鸟仓储</Descriptions.Item>
+            <Descriptions.Item label="快递费">包邮</Descriptions.Item>
           </Descriptions>
-          <Divider
-            style={{
-              marginBottom: 32,
-            }}
-          />
-          <div className={styles.title}>退货商品</div>
+        </Card>
+        <Card title="商品列表">
           <Table
             style={{
               marginBottom: 24,
@@ -216,16 +271,6 @@ class Basic extends Component {
             dataSource={goodsData}
             columns={goodsColumns}
             rowKey="id"
-          />
-          <div className={styles.title}>退货进度</div>
-          <Table
-            style={{
-              marginBottom: 16,
-            }}
-            pagination={false}
-            loading={loading}
-            dataSource={basicProgress}
-            columns={progressColumns}
           />
         </Card>
       </PageHeaderWrapper>
