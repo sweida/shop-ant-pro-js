@@ -20,6 +20,8 @@ import React, { Component } from 'react';
 import moment from 'moment';
 import Link from 'umi/link'
 import CreateForm from './components/CreateForm';
+import { deleteImage } from './service'
+import { beforeUpload } from '@/utils/upload';
 import 'braft-editor/dist/index.css';
 import BraftEditor from 'braft-editor';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
@@ -31,30 +33,20 @@ const { Option } = Select;
 const { TextArea } = Input;
 
 
-function beforeUpload(file) {
-  const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
-  if (!isJpgOrPng) {
-    message.error('You can only upload JPG/PNG file!');
-  }
-  const isLt2M = file.size / 1024 / 1024 < 2;
-  if (!isLt2M) {
-    message.error('Image must smaller than 2MB!');
-  }
-  return isJpgOrPng && isLt2M;
-}
-
 @connect(({ articleForm, loading }) => ({
   articleForm,
-  loading: loading.models.articleForm
+  loading: loading.models.articleForm,
 }))
 class ArticleCreateForm extends Component {
   state = {
     modalVisible: false,
+    uploadLoading: false,
+    imageUrl: ''
   };
   componentDidMount() {
     const { dispatch, form } = this.props;
     dispatch({
-      type: 'articleForm/getClassifys'
+      type: 'articleForm/getClassifys',
     });
 
     const id = this.props.location.query.id;
@@ -84,6 +76,9 @@ class ArticleCreateForm extends Component {
       obj.content = BraftEditor.createEditorState(data.content);
       form.setFieldsValue(obj);
     });
+    this.setState({
+      imageUrl: data.img
+    })
   };
 
   handleSubmit = e => {
@@ -98,6 +93,7 @@ class ArticleCreateForm extends Component {
             type: 'articleForm/saveForm',
             payload: {
               ...values,
+              img: this.state.imageUrl,
               id: this.props.location.query.id,
               content: values.content.toHTML(),
             },
@@ -112,6 +108,7 @@ class ArticleCreateForm extends Component {
             type: 'articleForm/submitForm',
             payload: {
               ...values,
+              img: this.state.imageUrl,
               content: values.content.toHTML(),
             },
           });
@@ -135,24 +132,39 @@ class ArticleCreateForm extends Component {
       payload: newData,
     });
     console.log(newData, articleForm.classifys, 23);
-    
+
     message.success('添加成功');
     this.handleModalVisible();
   };
 
   handleChange = info => {
+    console.log(this.state.imageUrl);
     if (info.file.status === 'uploading') {
-      this.setState({ loading: true });
+      this.setState({ uploadLoading: true });
       return;
     }
     if (info.file.status === 'done') {
-      // Get this url from response in real world.
-      getBase64(info.file.originFileObj, imageUrl =>
+      if (info.file.response.status == 'success') {
+        // 先删除旧图片
+        if (this.state.imageUrl) {
+          deleteImage({ image: this.state.imageUrl });
+        }
         this.setState({
-          imageUrl,
-          loading: false,
-        }),
-      );
+          imageUrl: info.file.response.data.url,
+          uploadLoading: false
+        })
+      } else {
+        this.setState({
+          uploadLoading: false,
+        });
+        message.error(info.file.response.message);
+      }
+      // getBase64(info.file.originFileObj, imageUrl =>
+      //   this.setState({
+      //     imageUrl,
+      //     uploadLoading: false,
+      //   }),
+      // );
     }
   };
 
@@ -163,7 +175,7 @@ class ArticleCreateForm extends Component {
   render() {
     const { articleForm, submitting, loading } = this.props;
     const { classifys } = articleForm;
-    const { modalVisible } = this.state;
+    const { modalVisible, imageUrl } = this.state;
     const {
       form: { getFieldDecorator, getFieldValue },
     } = this.props;
@@ -221,6 +233,12 @@ class ArticleCreateForm extends Component {
         <Link to="list">返回列表</Link>
       </div>
     );
+    const uploadButton = (
+      <div>
+        <Icon type={this.state.uploadLoading ? 'loading' : 'plus'} />
+        <div className="ant-upload-text">上传图片</div>
+      </div>
+    );
     return (
       <PageHeaderWrapper content={content}>
         <Spin spinning={loading} tip="Loading...">
@@ -244,18 +262,19 @@ class ArticleCreateForm extends Component {
               </FormItem>
               <FormItem {...formItemLayout} label="封面图">
                 <Upload
-                  name={'file'}
+                  name={'image'}
                   listType="picture-card"
                   className="avatar-uploader"
                   showUploadList={false}
-                  action={'/api/admin/file/upload'}
+                  action={'/api/image/upload'}
                   beforeUpload={beforeUpload}
                   onChange={this.handleChange}
                 >
-                  <div>
-                    <Icon type="plus" />
-                    <div className="ant-upload-text">上传图片</div>
-                  </div>
+                  {imageUrl ? (
+                    <img src={'http://static.golang365.com/' + imageUrl} alt="avatar" />
+                  ) : (
+                    uploadButton
+                  )}
                 </Upload>
               </FormItem>
               <FormItem {...formItemLayout} label="分类">

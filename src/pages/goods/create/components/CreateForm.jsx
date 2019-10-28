@@ -8,7 +8,6 @@ const CreateForm = props => {
   const okHandle = () => {
     form.validateFields((err, fieldsValue) => {
       if (err) return;
-      form.resetFields();
       handleAdd(fieldsValue);
     });
   };
@@ -16,7 +15,7 @@ const CreateForm = props => {
   return (
     <Modal
       destroyOnClose
-      title="新建规则"
+      title="新增分类"
       visible={modalVisible}
       onOk={okHandle}
       onCancel={() => handleModalVisible()}
@@ -28,17 +27,16 @@ const CreateForm = props => {
         wrapperCol={{
           span: 15,
         }}
-        label="描述"
+        label="名称"
       >
-        {form.getFieldDecorator('desc', {
+        {form.getFieldDecorator('newClassify', {
           rules: [
             {
               required: true,
-              message: '请输入至少五个字符的规则描述！',
-              min: 5,
+              message: '请输入分类名称',
             },
           ],
-        })(<Input placeholder="请输入" />)}
+        })(<Input placeholder="请不要添加已经存在的分类" />)}
       </FormItem>
     </Modal>
   );

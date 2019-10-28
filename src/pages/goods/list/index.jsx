@@ -80,8 +80,8 @@ class GoodsTableList extends Component {
       },
     },
     {
-      title: '点击量',
-      dataIndex: 'clicks',
+      title: '收藏量',
+      dataIndex: 'likeCount',
     },
     {
       title: '购买量',

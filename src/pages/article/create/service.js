@@ -24,3 +24,10 @@ export async function articleEdit(params) {
     data: params,
   });
 }
+
+export async function deleteImage(params) {
+  return request('/api/image/delete', {
+    method: 'POST',
+    data: params,
+  });
+}

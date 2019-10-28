@@ -1,5 +1,6 @@
 import request from '@/utils/request';
 
+
 export async function goodsCreate(params) {
   return request('/api/goods/add', {
     method: 'POST',
@@ -8,7 +9,7 @@ export async function goodsCreate(params) {
 }
 
 export async function goodsDetail(params) {
-  return request('/api/goods', {
+  return request('/api/goods/detail', {
     method: 'POST',
     data: params,
   });
@@ -19,4 +20,8 @@ export async function goodsEdit(params) {
     method: 'POST',
     data: params,
   });
+}
+
+export async function goodsClassifys() {
+  return request('/api/goods/classify');
 }
