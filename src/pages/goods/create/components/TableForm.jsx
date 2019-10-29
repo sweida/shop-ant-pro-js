@@ -16,24 +16,18 @@ class TableForm extends PureComponent {
   }
 
   clickedCancel = false;
-  index = 0;
+  index = 1;
   cacheOriginData = {};
   columns = [
     {
       title: '编号',
-      dataIndex: 'name',
-      key: 'name',
+      dataIndex: 'label_id',
+      key: 'label_id',
       width: '10%',
       render: (text, record) => {
         if (record.editable) {
           return (
-            <Input
-              value={text}
-              autoFocus
-              onChange={e => this.handleFieldChange(e, 'name', record.key)}
-              onKeyPress={e => this.handleKeyPress(e, record.key)}
-              placeholder="成员姓名"
-            />
+            <p style={{marginBottom: 0}}>{text}</p>
           );
         }
 
@@ -42,17 +36,17 @@ class TableForm extends PureComponent {
     },
     {
       title: '规格名称',
-      dataIndex: 'workId',
-      key: 'workId',
+      dataIndex: 'label',
+      key: 'label',
       width: '20%',
       render: (text, record) => {
         if (record.editable) {
           return (
             <Input
               value={text}
-              onChange={e => this.handleFieldChange(e, 'workId', record.key)}
+              onChange={e => this.handleFieldChange(e, 'label', record.key)}
               onKeyPress={e => this.handleKeyPress(e, record.key)}
-              placeholder="工号"
+              placeholder="规格名称"
             />
           );
         }
@@ -62,17 +56,19 @@ class TableForm extends PureComponent {
     },
     {
       title: '库存',
-      dataIndex: 'department',
-      key: 'department',
-      width: '15%',
+      dataIndex: 'stock',
+      key: 'stock',
+      width: '14%',
       render: (text, record) => {
         if (record.editable) {
           return (
             <Input
               value={text}
-              onChange={e => this.handleFieldChange(e, 'department', record.key)}
+              type="number"
+              min="0"
+              onChange={e => this.handleFieldChange(e, 'stock', record.key)}
               onKeyPress={e => this.handleKeyPress(e, record.key)}
-              placeholder="所属部门"
+              placeholder="库存"
             />
           );
         }
@@ -82,42 +78,47 @@ class TableForm extends PureComponent {
     },
     {
       title: '价格',
-      dataIndex: 'department',
-      key: 'department',
-      width: '15%',
+      dataIndex: 'price',
+      key: 'price',
+      width: '18%',
       render: (text, record) => {
         if (record.editable) {
           return (
             <Input
               value={text}
-              onChange={e => this.handleFieldChange(e, 'department', record.key)}
+              type="number"
+              prefix="￥"
+              suffix="分"
+              onChange={e => this.handleFieldChange(e, 'price', record.key)}
               onKeyPress={e => this.handleKeyPress(e, record.key)}
-              placeholder="所属部门"
+              placeholder="价格"
             />
           );
         }
 
-        return text;
+        return '¥ ' + (text / 100).toFixed(2);
       },
     },
     {
       title: '会员价格',
-      dataIndex: 'department',
-      key: 'department',
-      width: '20%',
+      dataIndex: 'vip_price',
+      key: 'vip_price',
+      width: '18%',
       render: (text, record) => {
         if (record.editable) {
           return (
             <Input
               value={text}
-              onChange={e => this.handleFieldChange(e, 'department', record.key)}
+              prefix="￥"
+              suffix="分"
+              onChange={e => this.handleFieldChange(e, 'vip_price', record.key)}
               onKeyPress={e => this.handleKeyPress(e, record.key)}
-              placeholder="所属部门"
+              placeholder="会员价格"
             />
           );
         }
 
-        return text;
+        return '¥ ' + (text / 100).toFixed(2);
       },
     },
     {
@@ -174,6 +175,12 @@ class TableForm extends PureComponent {
     };
   }
 
+  componentDidMount() {
+    if (this.props.value!=[]) {
+      this.newMember()
+    }
+  }
+
   getRowByKey(key, newData) {
     const { data = [] } = this.state;
     return (newData || data).filter(item => item.key === key)[0];
@@ -202,9 +209,11 @@ class TableForm extends PureComponent {
     const newData = data.map(item => ({ ...item }));
     newData.push({
       key: `NEW_TEMP_ID_${this.index}`,
-      workId: '',
-      name: '',
-      department: '',
+      label_id: this.index,
+      label: '',
+      price: '',
+      stock: 9999,
+      vip_price: '',
       editable: true,
       isNew: true,
     });
@@ -259,7 +268,7 @@ class TableForm extends PureComponent {
 
       const target = this.getRowByKey(key) || {};
 
-      if (!target.workId || !target.name || !target.department) {
+      if (!target.label || !target.stock || !target.price) {
         message.error('请填写完整成员信息。');
         e.target.focus();
         this.setState({
@@ -281,6 +290,8 @@ class TableForm extends PureComponent {
         loading: false,
       });
     }, 500);
+    console.log(this.state.data, 4444);
+    
   }
 
   cancel(e, key) {

@@ -22,7 +22,7 @@ import {
 import React, { Component, Fragment } from 'react';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import { connect } from 'dva';
-import { deleteOrRestored, reallyDelete } from './service';
+import { deleteOrRestored, reallyDelete, resetPassword } from './service';
 import CreateForm from './components/CreateForm';
 import StandardTable from './components/StandardTable';
 import styles from './style.less';
@@ -73,10 +73,7 @@ class AdminList extends Component {
             {row.deleted_at ? '启用' : '禁用'}
           </a>
           <Divider type="vertical" />
-          <Popconfirm
-            title="确定重置密码？密码将发送到您注册的邮件"
-            onConfirm={() => this.handleResetPassword()}
-          >
+          <Popconfirm title="确定重置密码？" onConfirm={() => this.handleResetPassword(row.id)} >
             <a href="#">重置密码</a>
           </Popconfirm>
           <Divider type="vertical" />
@@ -115,6 +112,13 @@ class AdminList extends Component {
         dispatch({
           type: 'adminList/fetch',
         });
+      }
+    });
+  }
+  handleResetPassword(id) {
+    resetPassword({ id }).then(res => {
+      if (res.status == 'success') {
+        message.success(res.message);
       }
     });
   }

@@ -21,6 +21,13 @@ export async function reallyDelete(params) {
   });
 }
 
+export async function resetPassword(params) {
+  return request('/api/admin/resetPassword', {
+    method: 'POST',
+    params,
+  });
+}
+
 export async function addRule(params) {
   return request('/api/rule', {
     method: 'POST',

@@ -22,6 +22,7 @@ import React, { Component } from 'react';
 import moment from 'moment';
 import Link from 'umi/link'
 import CreateForm from './components/CreateForm';
+import TableForm from './components/TableForm';
 import { deleteImage } from '@/pages/article/create/service'
 import { beforeUpload, getBase64 } from '@/utils/upload'
 import 'braft-editor/dist/index.css';
@@ -33,6 +34,26 @@ import styles from './style.less';
 const FormItem = Form.Item;
 const { Option } = Select;
 const { TextArea } = Input;
+
+// const stocksData = [
+//   {
+//     key: 1,
+//     label_id: 1,
+//     label: '22',
+//     stock: 333,
+//     price: 3322,
+//     vip_price: 222,
+//   },
+//   {
+//     key: 2,
+//     label_id: 2,
+//     label: '33',
+//     stock: 444,
+//     price: 555,
+//     vip_price: 222,
+//   },
+// ];
+
 
 @connect(({ goodsForm, loading }) => ({
   goodsForm,
@@ -46,9 +67,12 @@ class goodsCreateForm extends Component {
     previewImage: '',
     fileList: [],
   };
+  index = 2;
 
   componentDidMount() {
     const { dispatch } = this.props;
+    console.log(this.props, 222);
+
     dispatch({
       type: 'goodsForm/getClassifys',
     });
@@ -73,6 +97,16 @@ class goodsCreateForm extends Component {
       obj.detail = BraftEditor.createEditorState(data.detail);
       form.setFieldsValue(obj);
     });
+    // 没有uid会报错
+    data.banners.forEach(item => {
+      item.url = 'http://static.golang365.com/' + item.image;
+    });
+    data.stocks.forEach(item => {
+      item.key = 'NEW_TEMP_ID_' + item.label_id;
+    });
+    this.setState({
+      fileList: data.banners,
+    });
   };
   componentWillUnmount() {}
 
@@ -87,6 +121,12 @@ class goodsCreateForm extends Component {
     e.preventDefault();
 
     if (this.isEdit()) {
+      // 因为预览图加了域名前缀
+      let newList = [];
+      this.state.fileList.forEach(item => {
+        item.url = item.image;
+        newList.push(item);
+      });
       // 编辑
       form.validateFieldsAndScroll((err, values) => {
         if (!err) {
@@ -95,7 +135,8 @@ class goodsCreateForm extends Component {
             payload: {
               ...values,
               id: this.props.location.query.id,
-              content: values.content.toHTML(),
+              detail: values.detail.toHTML(),
+              banners: newList,
             },
           });
         }
@@ -108,7 +149,16 @@ class goodsCreateForm extends Component {
             type: 'goodsForm/submitForm',
             payload: {
               ...values,
-              content: values.content.toHTML(),
+              detail: values.detail.toHTML(),
+              banners: this.state.fileList,
+              stocks: [
+                {
+                  label_id: 1,
+                  label: '1',
+                  stock: 888,
+                  price: 1000,
+                },
+              ],
             },
           });
         }
@@ -129,7 +179,6 @@ class goodsCreateForm extends Component {
       type: 'goodsForm/addClassifys',
       payload: newData,
     });
-
     message.success('添加成功');
     this.handleModalVisible();
   };
@@ -150,26 +199,62 @@ class goodsCreateForm extends Component {
   // 上传图片
   handleChange = ({ fileList }) => {
     this.setState({ fileList });
-    let lastFile = fileList[fileList.length - 1]
+    let lastFile = fileList[fileList.length - 1];
     if (fileList.length > 0 && lastFile.status === 'uploading') {
       return;
     }
-    
-    if (fileList.length> 0 && lastFile.status === 'done') {
+
+    if (fileList.length > 0 && lastFile.status === 'done') {
+      console.log(this.state.fileList, 4);
+
       if (lastFile.response && lastFile.response.status == 'success') {
         lastFile.url = lastFile.response.data.url;
+        lastFile.image = lastFile.response.data.url;
+        lastFile.good_id = this.props.location.query.id || '';
       } else {
-        message.error(lastFile.response.message)
+        message.error(lastFile.response.message);
       }
+      // 每次修改图片，更新number字段
+      fileList.forEach((item, index) => {
+        item.number = index + 1;
+      });
+      fileList[0].active = 'active';
       this.setState({ fileList });
     }
   };
   // 删除图片
-  handleRemove =(file) => {
-    deleteImage({image: file.url}).then(res => {
-      message[res.status](res.message)
-    })
-  }
+  handleRemove = file => {
+    let url = file.image;
+    deleteImage({ image: url }).then(res => {
+      message[res.status](res.message);
+    });
+  };
+
+  // 新增商品规格
+  handleAddStock = () => {
+    console.log(222);
+    const { stockBox = [] } = this.state;
+    const newData = stockBox.map(item => ({ ...item }));
+    newData.push({
+      key: `NEW_STOCk_ID_${this.index}`,
+      label_id: this.index,
+      label: '',
+      good_id: '',
+      stock: 1000,
+      price: 998,
+    });
+    this.index += 1;
+    this.setState({
+      stockBox: newData,
+    });
+  };
+  removeStock = key => {
+    const { stockBox = [] } = this.state;
+    const newData = stockBox.filter(item => item.key !== key);
+    this.setState({
+      stockBox: newData,
+    });
+  };
 
   render() {
     const parentMethods = {
@@ -241,6 +326,7 @@ class goodsCreateForm extends Component {
         <div className="ant-upload-text">上传图片</div>
       </div>
     );
+
     return (
       <PageHeaderWrapper content={goBack}>
         <Spin spinning={loading} tip="Loading...">
@@ -262,6 +348,7 @@ class goodsCreateForm extends Component {
                   ],
                 })(<Input placeholder="请输入商品名称" />)}
               </FormItem>
+              {/* headers={{ authorization: 'Bearer ' + sessionStorage['token'] }} */}
               <FormItem {...formItemLayout2} label="商品图">
                 <Upload
                   name="image"
@@ -275,8 +362,13 @@ class goodsCreateForm extends Component {
                 >
                   {fileList.length >= 8 ? null : uploadButton}
                 </Upload>
-                <Modal visible={previewVisible} footer={null} onCancel={this.handleCancel}>
-                  <img alt="example" style={{ width: '100%' }} src={previewImage} />
+                <Modal
+                  visible={previewVisible}
+                  footer={null}
+                  onCancel={this.handleCancel}
+                  style={{ textAlign: 'center' }}
+                >
+                  <img alt="example" src={previewImage} />
                 </Modal>
               </FormItem>
               <FormItem {...formItemLayout} label="分类">
@@ -326,39 +418,20 @@ class goodsCreateForm extends Component {
                   />,
                 )}
               </FormItem>
-              <FormItem {...formItemLayout2} label="商品规格">
-                <Row gutter={8}>
-                  <Col span={1}>
-                    <span>NO.1</span>
-                  </Col>
-                  <Col span={4}>
-                    {getFieldDecorator('captcha1', {
-                      rules: [{ required: true, message: 'Please input the captcha you got!' }],
-                    })(<Input placeholder="请输入规格标签" />)}
-                  </Col>
-                  <Col span={4}>
-                    {getFieldDecorator('captcha2', {
-                      rules: [{ required: true, message: 'Please input the captcha you got!' }],
-                    })(<Input placeholder="请输入库存" />)}
-                  </Col>
-                  <Col span={4}>
-                    {getFieldDecorator('captcha3', {
-                      rules: [{ required: true, message: 'Please input the captcha you got!' }],
-                    })(<Input placeholder="请输入商品价格" />)}
-                  </Col>
-                  <Col span={4}>
-                    {getFieldDecorator('captcha4', {
-                      rules: [{ required: true, message: 'Please input the captcha you got!' }],
-                    })(<Input placeholder="请输入商品会员价格" />)}
-                  </Col>
-                  <Col span={4}>
-                    <Button type="primary">新增商品规格</Button>
-                  </Col>
-                </Row>
-              </FormItem>
-
               {/* 规格，库存，价格，会员价格 */}
-              {/* headers={{ authorization: 'Bearer ' + sessionStorage['token'] }} */}
+              <FormItem {...formItemLayout2} label="商品规格">
+                {getFieldDecorator('stocks')(<TableForm />)}
+                {/* {this.state.stockBox.map((item, index) => {
+                  return (
+                    <StockFrom
+                      data={item}
+                      index={index}
+                      removeStock={this.removeStock}
+                      handleAddStock={this.handleAddStock}
+                    />
+                  );
+                })} */}
+              </FormItem>
 
               <FormItem {...formItemLayout2} label="商品详情">
                 <div style={{ border: '1px solid #d1d1d1', borderRadius: '5px' }}>
@@ -412,5 +485,7 @@ class goodsCreateForm extends Component {
     );
   }
 }
+
+
 
 export default Form.create()(goodsCreateForm);

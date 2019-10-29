@@ -33,16 +33,20 @@ const Model = {
       });
     },
     *submitForm({ payload }, { call }) {
-      yield call(goodsCreate, payload);
-      message.success('商品新增成功！');
-      setTimeout(() => {
-        router.push('/goods/list');
-      }, 300);
+      const res = yield call(goodsCreate, payload);
+      if (res.status == 'success') {
+        message.success(res.message);
+        setTimeout(() => {
+          router.push('/goods/list');
+        }, 300);
+      } else {
+        message.error(res.message);
+      }
     },
     *saveForm({ payload }, { call }) {
       const res = yield call(goodsEdit, payload);
       if (res.status == 'success') {
-        message.success('商品修改成功！');
+        message.success(res.message);
         setTimeout(() => {
           router.push('/goods/list');
         }, 300);
