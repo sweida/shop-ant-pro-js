@@ -65,7 +65,7 @@ class GoodsTableList extends Component {
       title: '封面',
       dataIndex: 'defaultBanner',
       render(val) {
-        return <Avatar shape="square" size="large" src={val} />;
+        return <Avatar shape="square" size="large" src={'http://static.golang365.com/'+val} />;
       },
     },
     {

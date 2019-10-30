@@ -258,7 +258,7 @@ class ArticleCreateForm extends Component {
                       message: '文章标题不能为空',
                     },
                   ],
-                })(<Input placeholder="请输入文章标题" />)}
+                })(<Input placeholder="请输入文章标题" allowClear />)}
               </FormItem>
               <FormItem {...formItemLayout} label="封面图">
                 <Upload
@@ -314,7 +314,7 @@ class ArticleCreateForm extends Component {
                 )}
               </FormItem>
               <FormItem {...formItemLayout} label="商品编号">
-                {getFieldDecorator('good_id')(<Input placeholder="请输入推荐的商品编号" />)}
+                {getFieldDecorator('goods_id')(<Input placeholder="请输入推荐的商品编号" />)}
               </FormItem>
               {/* headers={{ authorization: 'Bearer ' + sessionStorage['token'] }} */}
 

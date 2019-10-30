@@ -125,31 +125,26 @@ export default {
           authority: ['admin', 'user'],
           routes: [
             {
-              path: '/article',
-              icon: 'table',
-              name: '文章管理',
+              path: '/order',
+              icon: 'shopping-cart',
+              name: '订单管理',
               routes: [
                 {
-                  name: '文章列表',
-                  path: '/article/list',
-                  component: './article/list',
+                  name: '订单列表',
+                  path: '/order/list',
+                  component: './order/list',
                 },
                 {
-                  name: '发布文章',
-                  path: '/article/create',
-                  component: './article/create',
-                },
-                {
-                  name: '编辑文章',
-                  path: '/article/edit',
-                  component: './article/create',
+                  name: '订单详情',
+                  path: '/order/detail',
+                  component: './order/detail',
                   hideInMenu: true,
                 },
               ],
             },
             {
               path: '/goods',
-              icon: 'table',
+              icon: 'shop',
               name: '商品管理',
               routes: [
                 {
@@ -171,31 +166,35 @@ export default {
               ],
             },
             {
-              path: '/order',
-              icon: 'table',
-              name: '订单管理',
+              path: '/article',
+              icon: 'form',
+              name: '文章管理',
               routes: [
                 {
-                  name: '订单列表',
-                  path: '/order/list',
-                  component: './order/list',
+                  name: '文章列表',
+                  path: '/article/list',
+                  component: './article/list',
                 },
                 {
-                  name: '订单详情',
-                  path: '/order/detail',
-                  component: './order/detail',
+                  name: '发布文章',
+                  path: '/article/create',
+                  component: './article/create',
+                },
+                {
+                  name: '编辑文章',
+                  path: '/article/edit',
+                  component: './article/create',
                   hideInMenu: true,
                 },
               ],
             },
             {
               path: '/member',
-              icon: 'table',
+              icon: 'usergroup-add',
               name: '会员管理',
               routes: [
                 {
                   name: '会员列表',
-                  icon: 'smile',
                   path: '/member/list',
                   component: './member/list',
                 },
@@ -203,12 +202,11 @@ export default {
             },
             {
               path: '/admin',
-              icon: 'table',
+              icon: 'user',
               name: '管理员',
               routes: [
                 {
                   name: '管理员列表',
-                  icon: 'smile',
                   path: '/admin/list',
                   component: './admin/list',
                 },
@@ -221,13 +219,11 @@ export default {
               routes: [
                 {
                   name: '广告列表',
-                  icon: 'smile',
                   path: '/ad/list',
                   component: './ad/list',
                 },
                 {
                   name: '广告分类',
-                  icon: 'smile',
                   path: '/ad/classify',
                   component: './ad/classify',
                 },

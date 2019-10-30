@@ -37,11 +37,15 @@ const Model = {
       });
     },
     *submitForm({ payload }, { call }) {
-      yield call(articleCreate, payload);
-      message.success('文章新增成功！');
-      setTimeout(() => {
-        router.push('/article/list');
-      }, 300);
+      const res = yield call(articleCreate, payload);
+      if (res.status == 'success') {
+        message.success(res.message);
+        setTimeout(() => {
+          router.push('/article/list');
+        }, 300);
+      } else {
+        message.error(res.message);
+      }
     },
     *saveForm({ payload }, { call }) {
       const res = yield call(articleEdit, payload);
