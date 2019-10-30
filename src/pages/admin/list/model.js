@@ -49,6 +49,7 @@ const Model = {
   },
   reducers: {
     save(state, action) {
+      console.log(action.payload, 333);
       return {
         ...state,
         data: {
@@ -60,6 +61,7 @@ const Model = {
           },
         },
       };
+      
     },
     // deleteOrRestored(state, action) {
     //   return {

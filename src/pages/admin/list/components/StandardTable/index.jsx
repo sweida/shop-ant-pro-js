@@ -42,12 +42,19 @@ class StandardTable extends Component {
     }));
     const { onSelectRow } = this.props;
 
-
-
     this.setState({
       selectedRowKeys: currySelectedRowKeys,
       needTotalList,
     });
+  };
+  handleTableChange = (pagination, filters, sorter, ...rest) => {
+    console.log(pagination, 888, onChange);
+    
+    const { onChange } = this.props;
+
+    if (onChange) {
+      onChange(pagination, filters, sorter, ...rest);
+    }
   };
 
   cleanSelectedKeys = () => {
@@ -62,11 +69,12 @@ class StandardTable extends Component {
     const { list = [], pagination = false } = data || {};
     const paginationProps = pagination
       ? {
-          showSizeChanger: true,
+          // showSizeChanger: true,
           showQuickJumper: true,
           ...pagination,
         }
       : false;
+
     const rowSelection = {
       selectedRowKeys,
       onChange: this.handleRowSelectChange,

@@ -22,6 +22,7 @@ import Link from 'umi/link'
 import React, { Component, Fragment } from 'react';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import { connect } from 'dva';
+import { deleteOrRestored, reallyDelete } from './service';
 import moment from 'moment';
 import CreateForm from './components/CreateForm';
 import StandardTable from './components/StandardTable';
@@ -36,12 +37,11 @@ const getValue = obj =>
     .map(key => obj[key])
     .join(',');
 
-const statusMap = ['default', 'processing', 'success', 'error'];
-const status = ['关闭', '运行中', '已上线', '异常'];
 
 /* eslint react/no-multi-comp:0 */
-@connect(({ articleList, loading }) => ({
+@connect(({ articleList, articleForm, loading }) => ({
   articleList,
+  articleForm,
   loading: loading.models.articleList,
 }))
 class ArticlesTableList extends Component {
@@ -62,13 +62,13 @@ class ArticlesTableList extends Component {
       title: '标题',
       dataIndex: 'title',
     },
-    // {
-    //   title: '封面',
-    //   dataIndex: 'img',
-    //   render(val) {
-    //     return <Avatar shape="square" size="large" src={val} />;
-    //   },
-    // },
+    {
+      title: '封面',
+      dataIndex: 'img',
+      render(val) {
+        return <Avatar shape="square" size="large" src={'http://static.golang365.com/' + val} />;
+      },
+    },
     {
       title: '分类',
       dataIndex: 'classify',
@@ -96,9 +96,13 @@ class ArticlesTableList extends Component {
       title: '操作',
       render: (text, row) => (
         <Fragment>
+          <a onClick={() => this.handleDeleteOrRestored(row.id)}>
+            {row.deleted_at ? '恢复' : '下架'}
+          </a>
+          <Divider type="vertical" />
           <Link to={'edit?id=' + row.id}>编辑</Link>
           <Divider type="vertical" />
-          <Popconfirm title="确定删除吗？" onConfirm={() => this.handleDelete()}>
+          <Popconfirm title="确定删除吗？" onConfirm={() => this.handleReallyDelete(row.id)}>
             <a href="#">删除</a>
           </Popconfirm>
         </Fragment>
@@ -111,9 +115,35 @@ class ArticlesTableList extends Component {
     dispatch({
       type: 'articleList/fetch',
     });
+    dispatch({
+      type: 'articleForm/getClassifys',
+    });
   }
   handleDelete() {
     console.log('删除');
+  }
+
+  handleDeleteOrRestored(id) {
+    deleteOrRestored({ id }).then(res => {
+      if (res.status == 'success') {
+        message.success(res.message);
+        const { dispatch } = this.props;
+        dispatch({
+          type: 'articleList/fetch',
+        });
+      }
+    });
+  }
+  handleReallyDelete(id) {
+    reallyDelete({ id }).then(res => {
+      if (res.status == 'success') {
+        message.success(res.message);
+        const { dispatch } = this.props;
+        dispatch({
+          type: 'articleList/fetch',
+        });
+      }
+    });
   }
 
   handleStandardTableChange = (pagination, filtersArg, sorter) => {
@@ -157,7 +187,8 @@ class ArticlesTableList extends Component {
       expandForm: !expandForm,
     });
   };
-  handleMenuClick = e => {
+
+  handleDeletes = e => {
     const { dispatch } = this.props;
     const { selectedRows } = this.state;
     if (!selectedRows) return;
@@ -241,8 +272,11 @@ class ArticlesTableList extends Component {
   };
 
   renderSimpleForm() {
-    const { form } = this.props;
-    const { getFieldDecorator } = form;
+    const {
+      articleForm,
+      form: { getFieldDecorator },
+    } = this.props;
+    const { classifys } = articleForm;
     return (
       <Form onSubmit={this.handleSearch} layout="inline">
         <Row
@@ -253,21 +287,18 @@ class ArticlesTableList extends Component {
           }}
         >
           <Col md={8} sm={24}>
-            <FormItem label="规则名称">
-              {getFieldDecorator('name')(<Input placeholder="请输入" />)}
-            </FormItem>
-          </Col>
-          <Col md={8} sm={24}>
-            <FormItem label="使用状态">
+            <FormItem label="选择分类">
               {getFieldDecorator('status')(
                 <Select
-                  placeholder="请选择"
+                  placeholder="请选择分类"
                   style={{
                     width: '100%',
                   }}
                 >
-                  <Option value="0">关闭</Option>
-                  <Option value="1">运行中</Option>
+                  <Option key="all">全部</Option>
+                  {classifys.map(item => (
+                    <Option key={item}>{item}</Option>
+                  ))}
                 </Select>,
               )}
             </FormItem>
@@ -277,163 +308,11 @@ class ArticlesTableList extends Component {
               <Button type="primary" htmlType="submit">
                 查询
               </Button>
-              <Button
-                style={{
-                  marginLeft: 8,
-                }}
-                onClick={this.handleFormReset}
-              >
-                重置
-              </Button>
-              <a
-                style={{
-                  marginLeft: 8,
-                }}
-                onClick={this.toggleForm}
-              >
-                展开 <Icon type="down" />
-              </a>
             </span>
           </Col>
         </Row>
       </Form>
     );
-  }
-
-  renderAdvancedForm() {
-    const {
-      form: { getFieldDecorator },
-    } = this.props;
-    return (
-      <Form onSubmit={this.handleSearch} layout="inline">
-        <Row
-          gutter={{
-            md: 8,
-            lg: 24,
-            xl: 48,
-          }}
-        >
-          <Col md={8} sm={24}>
-            <FormItem label="规则名称">
-              {getFieldDecorator('name')(<Input placeholder="请输入" />)}
-            </FormItem>
-          </Col>
-          <Col md={8} sm={24}>
-            <FormItem label="使用状态">
-              {getFieldDecorator('status')(
-                <Select
-                  placeholder="请选择"
-                  style={{
-                    width: '100%',
-                  }}
-                >
-                  <Option value="0">关闭</Option>
-                  <Option value="1">运行中</Option>
-                </Select>,
-              )}
-            </FormItem>
-          </Col>
-          <Col md={8} sm={24}>
-            <FormItem label="调用次数">
-              {getFieldDecorator('number')(
-                <InputNumber
-                  style={{
-                    width: '100%',
-                  }}
-                />,
-              )}
-            </FormItem>
-          </Col>
-        </Row>
-        <Row
-          gutter={{
-            md: 8,
-            lg: 24,
-            xl: 48,
-          }}
-        >
-          <Col md={8} sm={24}>
-            <FormItem label="更新日期">
-              {getFieldDecorator('date')(
-                <DatePicker
-                  style={{
-                    width: '100%',
-                  }}
-                  placeholder="请输入更新日期"
-                />,
-              )}
-            </FormItem>
-          </Col>
-          <Col md={8} sm={24}>
-            <FormItem label="使用状态">
-              {getFieldDecorator('status3')(
-                <Select
-                  placeholder="请选择"
-                  style={{
-                    width: '100%',
-                  }}
-                >
-                  <Option value="0">关闭</Option>
-                  <Option value="1">运行中</Option>
-                </Select>,
-              )}
-            </FormItem>
-          </Col>
-          <Col md={8} sm={24}>
-            <FormItem label="使用状态">
-              {getFieldDecorator('status4')(
-                <Select
-                  placeholder="请选择"
-                  style={{
-                    width: '100%',
-                  }}
-                >
-                  <Option value="0">关闭</Option>
-                  <Option value="1">运行中</Option>
-                </Select>,
-              )}
-            </FormItem>
-          </Col>
-        </Row>
-        <div
-          style={{
-            overflow: 'hidden',
-          }}
-        >
-          <div
-            style={{
-              float: 'right',
-              marginBottom: 24,
-            }}
-          >
-            <Button type="primary" htmlType="submit">
-              查询
-            </Button>
-            <Button
-              style={{
-                marginLeft: 8,
-              }}
-              onClick={this.handleFormReset}
-            >
-              重置
-            </Button>
-            <a
-              style={{
-                marginLeft: 8,
-              }}
-              onClick={this.toggleForm}
-            >
-              收起 <Icon type="up" />
-            </a>
-          </div>
-        </div>
-      </Form>
-    );
-  }
-
-  renderForm() {
-    const { expandForm } = this.state;
-    return expandForm ? this.renderAdvancedForm() : this.renderSimpleForm();
   }
 
   render() {
@@ -442,12 +321,7 @@ class ArticlesTableList extends Component {
       loading,
     } = this.props;
     const { selectedRows, modalVisible, updateModalVisible, stepFormValues } = this.state;
-    const menu = (
-      <Menu onClick={this.handleMenuClick} selectedKeys={[]}>
-        <Menu.Item key="remove">删除</Menu.Item>
-        <Menu.Item key="approval">批量审批</Menu.Item>
-      </Menu>
-    );
+
     const parentMethods = {
       handleAdd: this.handleAdd,
       handleModalVisible: this.handleModalVisible,
@@ -460,21 +334,17 @@ class ArticlesTableList extends Component {
       <PageHeaderWrapper>
         <Card bordered={false}>
           <div className={styles.tableList}>
-            <div className={styles.tableListForm}>{this.renderForm()}</div>
+            <div className={styles.tableListForm}>{this.renderSimpleForm()}</div>
             <div className={styles.tableListOperator}>
               <Button icon="plus" type="primary" onClick={() => router.push('create')}>
                 新增文章
               </Button>
-              {selectedRows.length > 0 && (
+              {/* {selectedRows.length > 0 && (
                 <span>
-                  <Button>批量操作</Button>
-                  <Dropdown overlay={menu}>
-                    <Button>
-                      更多操作 <Icon type="down" />
-                    </Button>
-                  </Dropdown>
+                  <Button onClick={this.handleDeletes}>批量删除</Button>
+                  <Button onClick={this.handleDeletes}>批量下架</Button>
                 </span>
-              )}
+              )} */}
             </div>
             <StandardTable
               selectedRows={selectedRows}

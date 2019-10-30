@@ -73,7 +73,7 @@ class AdminList extends Component {
             {row.deleted_at ? '启用' : '禁用'}
           </a>
           <Divider type="vertical" />
-          <Popconfirm title="确定重置密码？" onConfirm={() => this.handleResetPassword(row.id)} >
+          <Popconfirm title="确定重置密码？" onConfirm={() => this.handleResetPassword(row.id)}>
             <a href="#">重置密码</a>
           </Popconfirm>
           <Divider type="vertical" />
@@ -92,6 +92,30 @@ class AdminList extends Component {
     });
   }
   addAdmin() {}
+  // 分页
+  handleStandardTableChange = (pagination, filtersArg, sorter) => {
+    const { dispatch } = this.props;
+    const filters = Object.keys(filtersArg).reduce((obj, key) => {
+      const newObj = { ...obj };
+      newObj[key] = getValue(filtersArg[key]);
+      return newObj;
+    }, {});
+    const params = {
+      currentPage: pagination.current,
+      page: pagination.current,
+      pageSize: pagination.pageSize,
+      ...filters,
+    };
+
+    if (sorter.field) {
+      params.sorter = `${sorter.field}_${sorter.order}`;
+    }
+
+    dispatch({
+      type: 'adminList/fetch',
+      payload: params,
+    });
+  };
 
   handleDeleteOrRestored(id) {
     deleteOrRestored({ id }).then(res => {
@@ -149,6 +173,7 @@ class AdminList extends Component {
               data={data}
               rowKey={data => data.id}
               columns={this.columns}
+              onChange={this.handleStandardTableChange}
             />
           </div>
         </Card>

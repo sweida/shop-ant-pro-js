@@ -14,7 +14,8 @@ const Model = {
     // call 请求地址
     // put 操作返回值
     *fetch({ payload, callback }, { call, put }) {
-      const response = yield call(articleDetail, payload);
+      let params = {...payload, all: 'all'}
+      const response = yield call(articleDetail, params);
       yield put({
         type: 'detail',
         payload: response,

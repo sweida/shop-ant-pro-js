@@ -10,7 +10,8 @@ const Model = {
   },
   effects: {
     *fetch({ payload }, { call, put }) {
-      const response = yield call(queryArticle, payload);
+      let params = { ...payload, all: 'all' };
+      const response = yield call(queryArticle, params);
       yield put({
         type: 'save',
         payload: response.data,
