@@ -71,7 +71,6 @@ class goodsCreateForm extends Component {
 
   componentDidMount() {
     const { dispatch } = this.props;
-    console.log(this.props, 222);
 
     dispatch({
       type: 'goodsForm/getClassifys',

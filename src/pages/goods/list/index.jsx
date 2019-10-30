@@ -106,9 +106,16 @@ class GoodsTableList extends Component {
   ];
 
   componentDidMount() {
-    const { dispatch } = this.props;
+    const {
+      dispatch,
+      goodsList: { data },
+    } = this.props;
+    router.push({ query: { page: data.pagination.current } });
+    const page = data.pagination.current;
+
     dispatch({
       type: 'goodsList/fetch',
+      payload: {page: page}
     });
   }
   handleDelete() {
@@ -125,6 +132,7 @@ class GoodsTableList extends Component {
     }, {});
     const params = {
       currentPage: pagination.current,
+      page: pagination.current,
       pageSize: pagination.pageSize,
       ...formValues,
       ...filters,
@@ -138,6 +146,8 @@ class GoodsTableList extends Component {
       type: 'goodsList/fetch',
       payload: params,
     });
+
+    router.push({query: {page: pagination.current}});
   };
   handleFormReset = () => {
     const { form, dispatch } = this.props;

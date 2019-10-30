@@ -3,9 +3,21 @@ import DocumentTitle from 'react-document-title';
 import Link from 'umi/link';
 import React from 'react';
 import { connect } from 'dva';
-import SelectLang from '@/components/SelectLang';
+
 import logo from '../assets/logo.svg';
 import styles from './UserLayout.less';
+
+const defaultFooterDom = (
+  <DefaultFooter
+    copyright="2019 生鲜后台管理系统"
+    links={[
+      {
+        key: 'Crafted base on Laravel + React',
+        title: 'Crafted base on Laravel + React',
+      },
+    ]}
+  />
+);
 
 const UserLayout = props => {
   const {
@@ -30,9 +42,7 @@ const UserLayout = props => {
       })}
     >
       <div className={styles.container}>
-        <div className={styles.lang}>
-          <SelectLang />
-        </div>
+        <div className={styles.lang}></div>
         <div className={styles.content}>
           <div className={styles.top}>
             <div className={styles.header}>
@@ -45,7 +55,7 @@ const UserLayout = props => {
           </div>
           {children}
         </div>
-        <DefaultFooter />
+        {defaultFooterDom}
       </div>
     </DocumentTitle>
   );

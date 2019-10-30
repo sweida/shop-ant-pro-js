@@ -15,7 +15,6 @@ const Model = {
         type: 'save',
         payload: response.data,
       });
-      console.log(response);
       
     },
 
