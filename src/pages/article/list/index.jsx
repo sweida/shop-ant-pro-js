@@ -77,7 +77,7 @@ class ArticlesTableList extends Component {
       title: '状态',
       dataIndex: 'deleted_at',
       render(val) {
-        return val ? <Tag color="red">下架</Tag> : <Tag color="blue">正常</Tag>;
+        return val ? <Tag color="red">已下架</Tag> : <Tag color="blue">正常</Tag>;
       },
     },
     {
@@ -283,10 +283,9 @@ class ArticlesTableList extends Component {
 
   renderSimpleForm() {
     const {
-      articleForm,
+      articleForm: { classifys },
       form: { getFieldDecorator },
     } = this.props;
-    const { classifys } = articleForm;
     return (
       <Form onSubmit={this.handleSearch} layout="inline">
         <Row

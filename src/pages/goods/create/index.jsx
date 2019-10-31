@@ -35,25 +35,6 @@ const FormItem = Form.Item;
 const { Option } = Select;
 const { TextArea } = Input;
 
-// const stocksData = [
-//   {
-//     key: 1,
-//     label_id: 1,
-//     label: '22',
-//     stock: 333,
-//     price: 3322,
-//     vip_price: 222,
-//   },
-//   {
-//     key: 2,
-//     label_id: 2,
-//     label: '33',
-//     stock: 444,
-//     price: 555,
-//     vip_price: 222,
-//   },
-// ];
-
 
 @connect(({ goodsForm, loading }) => ({
   goodsForm,

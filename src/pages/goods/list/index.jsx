@@ -93,7 +93,7 @@ class GoodsTableList extends Component {
     },
     {
       title: '操作',
-      render: (text, row) => (
+      render: (row) => (
         <Fragment>
           <Link to={'edit?id=' + row.id}>编辑</Link>
           <Divider type="vertical" />

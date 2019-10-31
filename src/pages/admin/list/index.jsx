@@ -47,7 +47,7 @@ class AdminList extends Component {
       title: '状态',
       dataIndex: 'deleted_at',
       render(val) {
-        return val ? <Tag color="red">禁用</Tag> : <Tag color="blue">正常</Tag>;
+        return val ? <Tag color="red">已禁用</Tag> : <Tag color="blue">正常</Tag>;
       },
     },
     {

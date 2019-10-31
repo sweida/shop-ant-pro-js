@@ -223,9 +223,15 @@ export default {
                   component: './ad/list',
                 },
                 {
-                  name: '广告分类',
-                  path: '/ad/classify',
-                  component: './ad/classify',
+                  name: '新增广告图',
+                  path: '/ad/create',
+                  component: './ad/create',
+                },
+                {
+                  name: '编辑广告图',
+                  path: '/ad/edit',
+                  component: './ad/create',
+                  hideInMenu: true,
                 },
               ],
             },

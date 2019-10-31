@@ -323,6 +323,7 @@ class TableForm extends PureComponent {
     return (
       <Fragment>
         <Table
+          className="stock"
           loading={loading}
           columns={this.columns}
           dataSource={data}
