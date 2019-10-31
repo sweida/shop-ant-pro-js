@@ -6,13 +6,8 @@ import {
   Upload,
   Icon,
   Input,
-  Switch,
-  InputNumber,
-  Radio,
   Select,
-  Tooltip,
   Spin,
-  Divider,
   Row,
   Col,
   Modal,
@@ -21,7 +16,7 @@ import {
 import React, { Component } from 'react';
 import moment from 'moment';
 import Link from 'umi/link'
-import CreateForm from './components/CreateForm';
+import AddClassify from '@/components/Modal/AddClassify';
 import TableForm from './components/TableForm';
 import { deleteImage } from '@/pages/article/create/service'
 import { beforeUpload, getBase64 } from '@/utils/upload'
@@ -228,13 +223,6 @@ class goodsCreateForm extends Component {
       stockBox: newData,
     });
   };
-  removeStock = key => {
-    const { stockBox = [] } = this.state;
-    const newData = stockBox.filter(item => item.key !== key);
-    this.setState({
-      stockBox: newData,
-    });
-  };
 
   render() {
     const parentMethods = {
@@ -401,16 +389,6 @@ class goodsCreateForm extends Component {
               {/* 规格，库存，价格，会员价格 */}
               <FormItem {...formItemLayout2} label="商品规格">
                 {getFieldDecorator('stocks')(<TableForm />)}
-                {/* {this.state.stockBox.map((item, index) => {
-                  return (
-                    <StockFrom
-                      data={item}
-                      index={index}
-                      removeStock={this.removeStock}
-                      handleAddStock={this.handleAddStock}
-                    />
-                  );
-                })} */}
               </FormItem>
 
               <FormItem {...formItemLayout2} label="商品详情">
@@ -459,7 +437,7 @@ class goodsCreateForm extends Component {
               </FormItem>
             </Form>
           </Card>
-          <CreateForm {...parentMethods} modalVisible={modalVisible} classifys={classifys} />
+          <AddClassify {...parentMethods} modalVisible={modalVisible} classifys={classifys} />
         </Spin>
       </PageHeaderWrapper>
     );

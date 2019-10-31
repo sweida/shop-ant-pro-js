@@ -6,12 +6,8 @@ import {
   Upload,
   Icon,
   Input,
-  Switch,
-  InputNumber,
   message,
-  Radio,
   Select,
-  Tooltip,
   Spin,
   Row,
   Col

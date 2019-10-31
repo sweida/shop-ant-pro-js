@@ -6,6 +6,20 @@ export async function queryAd(params) {
     params,
   });
 }
+export async function AdDelete(params) {
+  return request('/api/ad/delete', {
+    method: 'POST',
+    params,
+  });
+}
+// 批量删除
+export async function AdBatchDelete(params) {
+  return request('/api/ad/batchDelete', {
+    method: 'POST',
+    params,
+  });
+}
+
 export async function removeRule(params) {
   return request('/api/rule', {
     method: 'POST',

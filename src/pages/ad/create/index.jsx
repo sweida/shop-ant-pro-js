@@ -9,7 +9,8 @@ import {
   Select,
   Spin,
   Row,
-  Col
+  Col,
+  InputNumber,
 } from 'antd';
 import React, { Component } from 'react';
 import Link from 'umi/link'
@@ -236,7 +237,14 @@ class AdCreateForm extends Component {
                 </Upload>
               </FormItem>
               <FormItem {...formItemLayout} label="图片链接">
-                {getFieldDecorator('url')(
+                {getFieldDecorator('url', {
+                  rules: [
+                    {
+                      required: true,
+                      message: '广告链接不能为空',
+                    },
+                  ],
+                })(
                   <Input
                     placeholder="上传图片或者手动输入图片链接"
                     allowClear
@@ -262,18 +270,10 @@ class AdCreateForm extends Component {
                   </Col>
                 </Row>
               </FormItem>
-              <FormItem
-                labelCol={{
-                  span: 2,
-                }}
-                wrapperCol={{
-                  span: 4,
-                }}
-                label="排序"
-              >
-                {getFieldDecorator('orderbyNum')(
-                  <Input type="number" placeholder="数字越大，越靠前" />,
-                )}
+              <FormItem {...formItemLayout} label="排序">
+                {getFieldDecorator('orderbyNum', {
+                  initialValue: 0,
+                })(<InputNumber type="number" placeholder="数字越大，越优先" style={{width: '150px'}}/>)}
               </FormItem>
 
               <FormItem

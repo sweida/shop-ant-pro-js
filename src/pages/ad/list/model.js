@@ -15,8 +15,6 @@ const Model = {
         type: 'save',
         payload: response.data,
       });
-      console.log(response);
-      
     },
 
     *add({ payload, callback }, { call, put }) {

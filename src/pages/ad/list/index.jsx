@@ -22,9 +22,9 @@ import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import { connect } from 'dva';
 import Link from 'umi/link'
 import router from 'umi/router'
+import { AdDelete, AdBatchDelete } from './service';
 import CreateForm from './components/CreateForm';
 import StandardTable from './components/StandardTable';
-import UpdateForm from './components/UpdateForm';
 import styles from './style.less';
 const FormItem = Form.Item;
 const { Option } = Select;
@@ -96,20 +96,41 @@ class AdTableList extends Component {
       ),
     },
   ];
+  page() {
+    const {
+      location,
+      adList: { data },
+    } = this.props;
+    return location.query.page || data.pagination.current;
+  }
 
   componentDidMount() {
     const { dispatch } = this.props;
+    router.push({ query: { page: this.page() } });
+
     dispatch({
       type: 'adList/fetch',
+      payload: { page: this.page() },
     });
     dispatch({
       type: 'adForm/getClassifys',
     });
   }
-  handleEdit() {}
 
-  handleDelete() {}
+  handleDelete(id) {
+    AdDelete({ id }).then(res => {
+      if (res.status == 'success') {
+        message.success(res.message);
+        const { dispatch } = this.props;
+        dispatch({
+          type: 'adList/fetch',
+          payload: { page: this.page() },
+        });
+      }
+    });
+  }
 
+  // 分页
   handleStandardTableChange = (pagination, filtersArg, sorter) => {
     const { dispatch } = this.props;
     const { formValues } = this.state;
@@ -134,7 +155,9 @@ class AdTableList extends Component {
       type: 'adList/fetch',
       payload: params,
     });
+    router.push({ query: { page: pagination.current } });
   };
+
   handleFormReset = () => {
     const { form, dispatch } = this.props;
     form.resetFields();
@@ -181,13 +204,31 @@ class AdTableList extends Component {
       selectedRows: rows,
     });
   };
+
+  // 批量删除
+  handleSeleceDelete = () => {
+    const { selectedRows } = this.state;
+    const { dispatch } = this.props;
+    
+    let key = selectedRows.map(row => row.id);
+    AdBatchDelete(key).then(res => {
+      if (res.status == 'success') {
+        dispatch({
+          type: 'adList/fetch',
+          payload: { page: this.page() },
+        });
+      }
+      message[res.status](res.message)
+    });
+  }
+
   handleSearch = e => {
     e.preventDefault();
     const { dispatch, form } = this.props;
     form.validateFields((err, fieldsValue) => {
       if (err) return;
-      if (fieldsValue.type=='all') {
-        fieldsValue=null
+      if (fieldsValue.type == 'all') {
+        fieldsValue = null;
       }
       this.setState({
         formValues: fieldsValue,
@@ -202,36 +243,6 @@ class AdTableList extends Component {
     this.setState({
       modalVisible: !!flag,
     });
-  };
-  handleUpdateModalVisible = (flag, record) => {
-    this.setState({
-      updateModalVisible: !!flag,
-      stepFormValues: record || {},
-    });
-  };
-  handleAdd = fields => {
-    const { dispatch } = this.props;
-    dispatch({
-      type: 'adList/add',
-      payload: {
-        desc: fields.desc,
-      },
-    });
-    message.success('添加成功');
-    this.handleModalVisible();
-  };
-  handleUpdate = fields => {
-    const { dispatch } = this.props;
-    dispatch({
-      type: 'adList/update',
-      payload: {
-        name: fields.name,
-        desc: fields.desc,
-        key: fields.key,
-      },
-    });
-    message.success('配置成功');
-    this.handleUpdateModalVisible();
   };
 
   renderSimpleForm() {
@@ -277,7 +288,6 @@ class AdTableList extends Component {
     );
   }
 
-
   render() {
     const {
       adList: { data },
@@ -301,7 +311,7 @@ class AdTableList extends Component {
               </Button>
               {selectedRows.length > 0 && (
                 <span>
-                  <Button>批量删除</Button>
+                  <Button onClick={this.handleSeleceDelete}>批量删除</Button>
                 </span>
               )}
             </div>
@@ -317,7 +327,6 @@ class AdTableList extends Component {
           </div>
         </Card>
         <CreateForm {...parentMethods} modalVisible={modalVisible} />
-
       </PageHeaderWrapper>
     );
   }
