@@ -19,7 +19,7 @@ import {
 import React, { Component } from 'react';
 import moment from 'moment';
 import Link from 'umi/link'
-import CreateForm from './components/CreateForm';
+import AddClassify from '@/components/Modal/AddClassify';
 import { deleteImage } from './service'
 import { beforeUpload } from '@/utils/upload';
 import 'braft-editor/dist/index.css';
@@ -41,10 +41,10 @@ class ArticleCreateForm extends Component {
   state = {
     modalVisible: false,
     uploadLoading: false,
-    imageUrl: ''
+    imageUrl: '',
   };
   componentDidMount() {
-    const { dispatch, form } = this.props;
+    const { dispatch } = this.props;
     dispatch({
       type: 'articleForm/getClassifys',
     });
@@ -60,13 +60,6 @@ class ArticleCreateForm extends Component {
       });
     }
   }
-  componentWillUnmount() {}
-
-  // 是否编辑
-  isEdit() {
-    return this.props.route.path == '/article/edit' ? true : false;
-  }
-
   setBaseInfo = data => {
     const { form } = this.props;
     Object.keys(form.getFieldsValue()).forEach(key => {
@@ -77,13 +70,19 @@ class ArticleCreateForm extends Component {
       form.setFieldsValue(obj);
     });
     this.setState({
-      imageUrl: data.img
-    })
+      imageUrl: data.img,
+    });
   };
+  componentWillUnmount() {}
+
+  // 是否编辑
+  isEdit() {
+    return this.props.route.path == '/article/edit' ? true : false;
+  }
 
   handleSubmit = e => {
-    const { dispatch, form } = this.props;
     e.preventDefault();
+    const { dispatch, form } = this.props;
 
     if (this.isEdit()) {
       // 编辑
@@ -117,7 +116,6 @@ class ArticleCreateForm extends Component {
     }
   };
 
-  addArticle() {}
   // 添加新分类
   handleModalVisible = flag => {
     this.setState({
@@ -151,8 +149,8 @@ class ArticleCreateForm extends Component {
         }
         this.setState({
           imageUrl: info.file.response.data.url,
-          uploadLoading: false
-        })
+          uploadLoading: false,
+        });
       } else {
         this.setState({
           uploadLoading: false,
@@ -168,17 +166,15 @@ class ArticleCreateForm extends Component {
     }
   };
 
-  handleSelectChange(value) {
-    console.log(`selected ${value}`);
-  }
-
   render() {
-    const { articleForm, submitting, loading } = this.props;
-    const { classifys } = articleForm;
-    const { modalVisible, imageUrl } = this.state;
     const {
-      form: { getFieldDecorator, getFieldValue },
+      form: { getFieldDecorator },
+      articleForm: { classifys },
+      submitting,
+      loading,
     } = this.props;
+    const { modalVisible, imageUrl } = this.state;
+
     const formItemLayout = {
       labelCol: {
         xs: { span: 24 },
@@ -365,7 +361,7 @@ class ArticleCreateForm extends Component {
             </Form>
           </Card>
         </Spin>
-        <CreateForm {...parentMethods} modalVisible={modalVisible} classifys={classifys} />
+        <AddClassify {...parentMethods} modalVisible={modalVisible} classifys={classifys} />
       </PageHeaderWrapper>
     );
   }

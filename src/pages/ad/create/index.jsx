@@ -1,24 +1,19 @@
 import {
   Button,
   Card,
-  DatePicker,
   Form,
   Upload,
   Icon,
   Input,
-  Switch,
   message,
-  Radio,
   Select,
-  Tooltip,
   Spin,
   Row,
   Col
 } from 'antd';
 import React, { Component } from 'react';
-import moment from 'moment';
 import Link from 'umi/link'
-import CreateForm from './components/CreateForm';
+import AddClassify from '@/components/Modal/AddClassify';
 import { deleteImage } from './service'
 import { beforeUpload } from '@/utils/upload';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
@@ -158,21 +153,15 @@ class AdCreateForm extends Component {
   }
 
   render() {
-    const { adForm, submitting, loading } = this.props;
-    const { classifys } = adForm;
-    const { modalVisible, imageUrl } = this.state;
     const {
-      form: { getFieldDecorator, getFieldValue },
+      form: { getFieldDecorator },
+      adForm: { classifys },
+      submitting,
+      loading,
     } = this.props;
+    const { modalVisible, imageUrl } = this.state;
+
     const formItemLayout = {
-      labelCol: {
-        sm: { span: 2 },
-      },
-      wrapperCol: {
-        sm: { span: 6 },
-      },
-    };
-    const formItemLayout2 = {
       labelCol: {
         sm: { span: 2 },
       },
@@ -246,16 +235,16 @@ class AdCreateForm extends Component {
                   )}
                 </Upload>
               </FormItem>
-              <FormItem {...formItemLayout2} label="图片链接">
+              <FormItem {...formItemLayout} label="图片链接">
                 {getFieldDecorator('url')(
                   <Input
                     placeholder="上传图片或者手动输入图片链接"
                     allowClear
-                    onChange={(e) => this.handleChangeValue(e)}
+                    onChange={e => this.handleChangeValue(e)}
                   />,
                 )}
               </FormItem>
-              <FormItem {...formItemLayout2} label="广告位置">
+              <FormItem {...formItemLayout} label="广告位置">
                 <Row gutter={8}>
                   <Col span={18}>
                     {getFieldDecorator('type')(
@@ -273,7 +262,15 @@ class AdCreateForm extends Component {
                   </Col>
                 </Row>
               </FormItem>
-              <FormItem {...formItemLayout} label="排序">
+              <FormItem
+                labelCol={{
+                  span: 2,
+                }}
+                wrapperCol={{
+                  span: 4,
+                }}
+                label="排序"
+              >
                 {getFieldDecorator('orderbyNum')(
                   <Input type="number" placeholder="数字越大，越靠前" />,
                 )}
@@ -298,7 +295,7 @@ class AdCreateForm extends Component {
             </Form>
           </Card>
         </Spin>
-        <CreateForm {...parentMethods} modalVisible={modalVisible} classifys={classifys} />
+        <AddClassify {...parentMethods} modalVisible={modalVisible} classifys={classifys} />
       </PageHeaderWrapper>
     );
   }

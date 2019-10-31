@@ -122,6 +122,7 @@ class AdTableList extends Component {
       currentPage: pagination.current,
       pageSize: pagination.pageSize,
       page: pagination.current,
+      ...formValues,
       ...filters,
     };
 
@@ -185,16 +186,15 @@ class AdTableList extends Component {
     const { dispatch, form } = this.props;
     form.validateFields((err, fieldsValue) => {
       if (err) return;
-      const values = {
-        ...fieldsValue,
-        updatedAt: fieldsValue.updatedAt && fieldsValue.updatedAt.valueOf(),
-      };
+      if (fieldsValue.type=='all') {
+        fieldsValue=null
+      }
       this.setState({
-        formValues: values,
+        formValues: fieldsValue,
       });
       dispatch({
         type: 'adList/fetch',
-        payload: values,
+        payload: fieldsValue,
       });
     });
   };
@@ -250,7 +250,7 @@ class AdTableList extends Component {
         >
           <Col md={8} sm={24}>
             <FormItem label="广告位置">
-              {getFieldDecorator('status')(
+              {getFieldDecorator('type')(
                 <Select
                   placeholder="请选择"
                   style={{
@@ -283,21 +283,13 @@ class AdTableList extends Component {
       adList: { data },
       loading,
     } = this.props;
-    const { selectedRows, modalVisible, updateModalVisible, stepFormValues } = this.state;
-    const menu = (
-      <Menu onClick={this.handleMenuClick} selectedKeys={[]}>
-        <Menu.Item key="remove">删除</Menu.Item>
-        <Menu.Item key="approval">批量审批</Menu.Item>
-      </Menu>
-    );
+    const { selectedRows, modalVisible } = this.state;
+
     const parentMethods = {
       handleAdd: this.handleAdd,
       handleModalVisible: this.handleModalVisible,
     };
-    const updateMethods = {
-      handleUpdateModalVisible: this.handleUpdateModalVisible,
-      handleUpdate: this.handleUpdate,
-    };
+
     return (
       <PageHeaderWrapper>
         <Card bordered={false}>
@@ -309,12 +301,7 @@ class AdTableList extends Component {
               </Button>
               {selectedRows.length > 0 && (
                 <span>
-                  <Button>批量操作</Button>
-                  <Dropdown overlay={menu}>
-                    <Button>
-                      更多操作 <Icon type="down" />
-                    </Button>
-                  </Dropdown>
+                  <Button>批量删除</Button>
                 </span>
               )}
             </div>
@@ -330,13 +317,7 @@ class AdTableList extends Component {
           </div>
         </Card>
         <CreateForm {...parentMethods} modalVisible={modalVisible} />
-        {stepFormValues && Object.keys(stepFormValues).length ? (
-          <UpdateForm
-            {...updateMethods}
-            updateModalVisible={updateModalVisible}
-            values={stepFormValues}
-          />
-        ) : null}
+
       </PageHeaderWrapper>
     );
   }
