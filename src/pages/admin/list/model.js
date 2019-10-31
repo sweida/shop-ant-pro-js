@@ -15,11 +15,7 @@ const Model = {
         type: 'save',
         payload: response.data,
       });
-      console.log(response);
     },
-    // *deleteOrRestoredAdmin({ }, { call, put }) {
-    //   yield call(deleteOrRestored);
-    // },
     *add({ payload, callback }, { call, put }) {
       const response = yield call(addRule, payload);
       yield put({
@@ -49,7 +45,6 @@ const Model = {
   },
   reducers: {
     save(state, action) {
-      console.log(action.payload, 333);
       return {
         ...state,
         data: {
@@ -61,21 +56,7 @@ const Model = {
           },
         },
       };
-      
     },
-    // deleteOrRestored(state, action) {
-    //   return {
-    //     ...state,
-    //     data: {
-    //       list: action.payload.data,
-    //       pagination: {
-    //         total: action.payload.total,
-    //         pageSize: 10,
-    //         current: action.payload.current_page,
-    //       },
-    //     },
-    //   };
-    // }
   },
 };
 export default Model;

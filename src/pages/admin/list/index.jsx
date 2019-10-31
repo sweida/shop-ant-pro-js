@@ -1,19 +1,8 @@
 import {
-  Badge,
   Button,
   Card,
-  Col,
-  DatePicker,
   Divider,
-  Dropdown,
   Form,
-  Icon,
-  Input,
-  InputNumber,
-  Menu,
-  Row,
-  Select,
-  Table,
   Tag,
   message,
   Avatar,
@@ -22,8 +11,8 @@ import {
 import React, { Component, Fragment } from 'react';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import { connect } from 'dva';
+import router from 'umi/router';
 import { deleteOrRestored, reallyDelete, resetPassword } from './service';
-import CreateForm from './components/CreateForm';
 import StandardTable from './components/StandardTable';
 import styles from './style.less';
 
@@ -84,11 +73,18 @@ class AdminList extends Component {
       ),
     },
   ];
+  page() {
+    const { location, adminList: {data} } = this.props;
+    return location.query.page || data.pagination.current;
+  }
 
   componentDidMount() {
-    const { dispatch } = this.props;
+    const { dispatch, } = this.props;
+    router.push({ query: { page: this.page() } });
+
     dispatch({
       type: 'adminList/fetch',
+      payload: { page: this.page()},
     });
   }
   addAdmin() {}
@@ -115,6 +111,7 @@ class AdminList extends Component {
       type: 'adminList/fetch',
       payload: params,
     });
+    router.push({ query: { page: pagination.current } });
   };
 
   handleDeleteOrRestored(id) {
@@ -124,6 +121,7 @@ class AdminList extends Component {
         const { dispatch } = this.props;
         dispatch({
           type: 'adminList/fetch',
+          payload: { page: this.page() },
         });
       }
     });
@@ -135,6 +133,7 @@ class AdminList extends Component {
         const { dispatch } = this.props;
         dispatch({
           type: 'adminList/fetch',
+          payload: { page: this.page() },
         });
       }
     });

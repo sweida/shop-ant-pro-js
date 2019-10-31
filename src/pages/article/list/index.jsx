@@ -110,10 +110,18 @@ class ArticlesTableList extends Component {
     },
   ];
 
+  page() {
+    const { location, articleList: {data} } = this.props;
+    return location.query.page || data.pagination.current;
+  }
+
   componentDidMount() {
     const { dispatch } = this.props;
+    router.push({ query: { page: this.page() } });
+
     dispatch({
       type: 'articleList/fetch',
+      payload: { page: this.page() },
     });
     dispatch({
       type: 'articleForm/getClassifys',
@@ -130,6 +138,7 @@ class ArticlesTableList extends Component {
         const { dispatch } = this.props;
         dispatch({
           type: 'articleList/fetch',
+          payload: { page: this.page() },
         });
       }
     });
@@ -141,6 +150,7 @@ class ArticlesTableList extends Component {
         const { dispatch } = this.props;
         dispatch({
           type: 'articleList/fetch',
+          payload: { page: this.page() },
         });
       }
     });

@@ -65,7 +65,7 @@ class GoodsTableList extends Component {
       title: '封面',
       dataIndex: 'defaultBanner',
       render(val) {
-        return <Avatar shape="square" size="large" src={'http://static.golang365.com/'+val} />;
+        return <Avatar shape="square" size="large" src={'http://static.golang365.com/' + val} />;
       },
     },
     {
@@ -104,18 +104,18 @@ class GoodsTableList extends Component {
       ),
     },
   ];
+  page() {
+    const { location, goodsList: {data} } = this.props;
+    return location.query.page || data.pagination.current;
+  }
 
   componentDidMount() {
-    const {
-      dispatch,
-      goodsList: { data },
-    } = this.props;
-    router.push({ query: { page: data.pagination.current } });
-    const page = data.pagination.current;
+    const { dispatch, } = this.props;
+    router.push({ query: {page: this.page()}});
 
     dispatch({
       type: 'goodsList/fetch',
-      payload: {page: page}
+      payload: { page: this.page() },
     });
   }
   handleDelete() {
@@ -147,7 +147,7 @@ class GoodsTableList extends Component {
       payload: params,
     });
 
-    router.push({query: {page: pagination.current}});
+    router.push({ query: { page: pagination.current } });
   };
   handleFormReset = () => {
     const { form, dispatch } = this.props;
