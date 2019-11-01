@@ -74,7 +74,7 @@ class goodsCreateForm extends Component {
     });
     // 没有uid会报错
     data.banners.forEach(item => {
-      item.url = 'http://static.golang365.com/' + item.image;
+      item.url = process.env.IMG_SERVER + item.image;
     });
     data.stocks.forEach(item => {
       item.key = 'NEW_TEMP_ID_' + item.label_id;

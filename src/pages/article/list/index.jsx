@@ -66,7 +66,7 @@ class ArticlesTableList extends Component {
       title: '封面',
       dataIndex: 'img',
       render(val) {
-        return <Avatar shape="square" size="large" src={'http://static.golang365.com/' + val} />;
+        return <Avatar shape="square" size="large" src={process.env.IMG_SERVER + val} />;
       },
     },
     {

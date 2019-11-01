@@ -70,12 +70,7 @@ class AdTableList extends Component {
       dataIndex: 'url',
       render(val) {
         return (
-          <Avatar
-            icon="picture"
-            shape="square"
-            size="large"
-            src={'http://static.golang365.com/' + val}
-          />
+          <Avatar icon="picture" shape="square" size="large" src={process.env.IMG_SERVER + val} />
         );
       },
     },
@@ -209,7 +204,7 @@ class AdTableList extends Component {
   handleSeleceDelete = () => {
     const { selectedRows } = this.state;
     const { dispatch } = this.props;
-    
+
     let key = selectedRows.map(row => row.id);
     AdBatchDelete(key).then(res => {
       if (res.status == 'success') {

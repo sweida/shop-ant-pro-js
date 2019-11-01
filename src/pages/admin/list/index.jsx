@@ -40,7 +40,7 @@ class AdminList extends Component {
       title: '头像',
       dataIndex: 'avatarUrl',
       render(val) {
-        return <Avatar size="large" src={val} icon="user" />;
+        return <Avatar size="large" src={process.env.IMG_SERVER + val} icon="user" />;
       },
     },
     {

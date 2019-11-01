@@ -263,7 +263,7 @@ class ArticleCreateForm extends Component {
                   onChange={this.handleChange}
                 >
                   {imageUrl ? (
-                    <img src={'http://static.golang365.com/' + imageUrl} alt="avatar" />
+                    <img src={process.env.IMG_SERVER + imageUrl} alt="avatar" />
                   ) : (
                     uploadButton
                   )}

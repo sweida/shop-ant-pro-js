@@ -230,7 +230,7 @@ class AdCreateForm extends Component {
                   onChange={this.handleChange}
                 >
                   {imageUrl ? (
-                    <img src={'http://static.golang365.com/' + imageUrl} alt="avatar" />
+                    <img src={process.env.IMG_SERVER + imageUrl} alt="avatar" />
                   ) : (
                     uploadButton
                   )}
@@ -273,7 +273,13 @@ class AdCreateForm extends Component {
               <FormItem {...formItemLayout} label="排序">
                 {getFieldDecorator('orderbyNum', {
                   initialValue: 0,
-                })(<InputNumber type="number" placeholder="数字越大，越优先" style={{width: '150px'}}/>)}
+                })(
+                  <InputNumber
+                    type="number"
+                    placeholder="数字越大，越优先"
+                    style={{ width: '150px' }}
+                  />,
+                )}
               </FormItem>
 
               <FormItem
