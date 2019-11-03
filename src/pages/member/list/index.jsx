@@ -19,6 +19,7 @@ import {
 import React, { Component, Fragment } from 'react';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import { connect } from 'dva';
+import Link from 'umi/link'
 import moment from 'moment';
 import CreateForm from './components/CreateForm';
 import StandardTable from './components/StandardTable';
@@ -73,44 +74,15 @@ class MemberList extends Component {
       title: '城市',
       dataIndex: 'city',
     },
-    // {
-    //   title: '状态',
-    //   dataIndex: 'status',
-    //   filters: [
-    //     {
-    //       text: status[0],
-    //       value: '0',
-    //     },
-    //     {
-    //       text: status[1],
-    //       value: '1',
-    //     },
-    //     {
-    //       text: status[2],
-    //       value: '2',
-    //     },
-    //     {
-    //       text: status[3],
-    //       value: '3',
-    //     },
-    //   ],
-
-    //   render(val) {
-    //     return <Badge status={statusMap[val]} text={status[val]} />;
-    //   },
-    // },
     {
       title: '注册时间',
       dataIndex: 'created_at',
-      // sorter: true,
     },
     {
       title: '操作',
-      render: (text, record) => (
+      render: (row) => (
         <Fragment>
-          <a onClick={() => this.handleUpdateModalVisible(true, record)}>配置</a>
-          <Divider type="vertical" />
-          <a href="">订阅警报</a>
+          <Link to={'center?id=' + row.id}>查看详情</Link>
         </Fragment>
       ),
     },

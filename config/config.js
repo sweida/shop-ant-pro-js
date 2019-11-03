@@ -199,6 +199,12 @@ export default {
                   path: '/member/list',
                   component: './member/list',
                 },
+                {
+                  name: '用户详情',
+                  path: '/member/center',
+                  component: './member/center',
+                  hideInMenu: true
+                },
               ],
             },
             {
@@ -469,7 +475,7 @@ export default {
       NODE_ENV,
       ...envConfig[NODE_ENV],
       // ...(NODE_ENV == 'development' ? envConfig.development : envConfig.production)
-    }
+    },
     // ANT_DESIGN_PRO_ONLY_DO_NOT_USE_IN_YOUR_PRODUCTION:
     //   ANT_DESIGN_PRO_ONLY_DO_NOT_USE_IN_YOUR_PRODUCTION || '', // preview.pro.ant.design only do not use in your production ; preview.pro.ant.design 专用环境变量，请不要在你的项目中使用它。
   },
