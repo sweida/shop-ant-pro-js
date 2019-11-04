@@ -174,6 +174,7 @@ class ArticlesTableList extends Component {
       type: 'orderList/fetch',
       payload: {},
     });
+    router.push({ query: { page: 1 } });
   };
   toggleForm = () => {
     const { expandForm } = this.state;
@@ -229,6 +230,7 @@ class ArticlesTableList extends Component {
         type: 'orderList/fetch',
         payload: values,
       });
+      router.push({ query: { page: 1 } });
     });
   };
   handleModalVisible = flag => {
