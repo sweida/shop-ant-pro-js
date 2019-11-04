@@ -30,6 +30,7 @@ import router from 'umi/router';
 import styles from './style.less';
 const FormItem = Form.Item;
 const { Option } = Select;
+const { RangePicker } = DatePicker;
 
 const getValue = obj =>
   Object.keys(obj)
@@ -37,7 +38,27 @@ const getValue = obj =>
     .join(',');
 
 const statusMap = ['warning', 'processing', 'success', 'error', 'success', 'default'];
-const status = ['待付款', '已付款', '已发货', '待确定', '已确定', '已取消'];
+const status = [
+  {
+    value: 1,
+    text: '待付款',
+  }, {
+    value: 2,
+    text: '已付款',
+  }, {
+    value: 3,
+    text: '已发货',
+  }, {
+    value: 4,
+    text: '待确定',
+  }, {
+    value: 5,
+    text: '已确定',
+  }, {
+    value: 6,
+    text: '已取消',
+  },
+];
 
 /* eslint react/no-multi-comp:0 */
 @connect(({ orderList, loading }) => ({
@@ -64,7 +85,7 @@ class ArticlesTableList extends Component {
     },
     {
       title: '商品金额',
-      dataIndex: 'goodPrice',
+      dataIndex: 'goodsPrice',
     },
     {
       title: '用户名',
@@ -73,34 +94,9 @@ class ArticlesTableList extends Component {
     {
       title: '状态',
       dataIndex: 'status',
-      filters: [
-        {
-          text: status[0],
-          value: '1',
-        },
-        {
-          text: status[1],
-          value: '2',
-        },
-        {
-          text: status[2],
-          value: '3',
-        },
-        {
-          text: status[3],
-          value: '4',
-        },
-        {
-          text: status[4],
-          value: '5',
-        },
-        {
-          text: status[5],
-          value: '6',
-        },
-      ],
+      filters: status,
       render(val) {
-        return <Badge status={statusMap[val-1]} text={status[val-1]} />;
+        return <Badge status={statusMap[val-1]} text={status[val-1].text} />;
       },
     },
     {
@@ -124,10 +120,18 @@ class ArticlesTableList extends Component {
     },
   ];
 
+  page() {
+    const { location, orderList: {data} } = this.props;
+    return location.query.page || data.pagination.current;
+  }
+
   componentDidMount() {
     const { dispatch } = this.props;
+    router.push({ query: { page: this.page() } });
+
     dispatch({
       type: 'orderList/fetch',
+      payload: { page: this.page() },
     });
   }
   handleDelete() {
@@ -145,6 +149,7 @@ class ArticlesTableList extends Component {
     const params = {
       currentPage: pagination.current,
       pageSize: pagination.pageSize,
+      page: pagination.current,
       ...formValues,
       ...filters,
     };
@@ -157,6 +162,7 @@ class ArticlesTableList extends Component {
       type: 'orderList/fetch',
       payload: params,
     });
+    router.push({ query: { page: pagination.current } });
   };
   handleFormReset = () => {
     const { form, dispatch } = this.props;
@@ -209,6 +215,9 @@ class ArticlesTableList extends Component {
     const { dispatch, form } = this.props;
     form.validateFields((err, fieldsValue) => {
       if (err) return;
+      if (fieldsValue.date) {
+        fieldsValue.date = moment(fieldsValue.date).format('YYYY-MM-DD');
+      }
       const values = {
         ...fieldsValue,
         updatedAt: fieldsValue.updatedAt && fieldsValue.updatedAt.valueOf(),
@@ -259,73 +268,6 @@ class ArticlesTableList extends Component {
   };
 
   renderSimpleForm() {
-    const { form } = this.props;
-    const { getFieldDecorator } = form;
-    return (
-      <Form onSubmit={this.handleSearch} layout="inline">
-        <Row
-          gutter={{
-            md: 8,
-            lg: 24,
-            xl: 48,
-          }}
-        >
-          <Col md={8} sm={24}>
-            <FormItem label="订单号">
-              {getFieldDecorator('name')(<Input placeholder="请输入" />)}
-            </FormItem>
-          </Col>
-          <Col md={8} sm={24}>
-            <FormItem label="状态">
-              {getFieldDecorator('status')(
-                <Select
-                  placeholder="请选择"
-                  style={{
-                    width: '100%',
-                  }}
-                >
-                  <Option value="1">关闭</Option>
-                  <Option value="2">关闭</Option>
-                  <Option value="3">关闭</Option>
-                  <Option value="4">关闭</Option>
-                  <Option value="5">关闭</Option>
-                  <Option value="6">运行中</Option>
-                  {/* {status.map((item, index) => {
-                    <Option value={index}>{item}</Option>;
-                  })} */}
-                </Select>,
-              )}
-            </FormItem>
-          </Col>
-          <Col md={8} sm={24}>
-            <span className={styles.submitButtons}>
-              <Button type="primary" htmlType="submit">
-                查询
-              </Button>
-              <Button
-                style={{
-                  marginLeft: 8,
-                }}
-                onClick={this.handleFormReset}
-              >
-                重置
-              </Button>
-              <a
-                style={{
-                  marginLeft: 8,
-                }}
-                onClick={this.toggleForm}
-              >
-                展开 <Icon type="down" />
-              </a>
-            </span>
-          </Col>
-        </Row>
-      </Form>
-    );
-  }
-
-  renderAdvancedForm() {
     const {
       form: { getFieldDecorator },
     } = this.props;
@@ -338,13 +280,13 @@ class ArticlesTableList extends Component {
             xl: 48,
           }}
         >
-          <Col md={8} sm={24}>
-            <FormItem label="规则名称">
-              {getFieldDecorator('name')(<Input placeholder="请输入" />)}
+          <Col md={6} sm={24}>
+            <FormItem label="订单号">
+              {getFieldDecorator('order_id')(<Input placeholder="请输入" />)}
             </FormItem>
           </Col>
-          <Col md={8} sm={24}>
-            <FormItem label="使用状态">
+          <Col md={6} sm={24}>
+            <FormItem label="订单状态">
               {getFieldDecorator('status')(
                 <Select
                   placeholder="请选择"
@@ -352,113 +294,42 @@ class ArticlesTableList extends Component {
                     width: '100%',
                   }}
                 >
-                  <Option value="0">关闭</Option>
-                  <Option value="1">运行中</Option>
+                  {status.map(item => (
+                    <Option key={item.value}>{item.text}</Option>
+                  ))}
                 </Select>,
               )}
             </FormItem>
           </Col>
-          <Col md={8} sm={24}>
-            <FormItem label="调用次数">
-              {getFieldDecorator('number')(
-                <InputNumber
-                  style={{
-                    width: '100%',
-                  }}
-                />,
-              )}
-            </FormItem>
-          </Col>
-        </Row>
-        <Row
-          gutter={{
-            md: 8,
-            lg: 24,
-            xl: 48,
-          }}
-        >
-          <Col md={8} sm={24}>
-            <FormItem label="更新日期">
+          <Col md={6} sm={24}>
+            <FormItem label="创建日期">
               {getFieldDecorator('date')(
                 <DatePicker
-                  style={{
-                    width: '100%',
-                  }}
-                  placeholder="请输入更新日期"
+                  style={{ width: '100%' }}
+                  format="YYYY-MM-DD"
+                  placeholder="请选择创建订单日期"
                 />,
               )}
             </FormItem>
           </Col>
-          <Col md={8} sm={24}>
-            <FormItem label="使用状态">
-              {getFieldDecorator('status3')(
-                <Select
-                  placeholder="请选择"
-                  style={{
-                    width: '100%',
-                  }}
-                >
-                  <Option value="0">关闭</Option>
-                  <Option value="1">运行中</Option>
-                </Select>,
-              )}
-            </FormItem>
-          </Col>
-          <Col md={8} sm={24}>
-            <FormItem label="使用状态">
-              {getFieldDecorator('status4')(
-                <Select
-                  placeholder="请选择"
-                  style={{
-                    width: '100%',
-                  }}
-                >
-                  <Option value="0">关闭</Option>
-                  <Option value="1">运行中</Option>
-                </Select>,
-              )}
-            </FormItem>
+          <Col md={6} sm={24}>
+            <span className={styles.submitButtons}>
+              <Button type="primary" htmlType="submit">
+                查询
+              </Button>
+              <Button
+                style={{
+                  marginLeft: 8,
+                }}
+                onClick={this.handleFormReset}
+              >
+                重置
+              </Button>
+            </span>
           </Col>
         </Row>
-        <div
-          style={{
-            overflow: 'hidden',
-          }}
-        >
-          <div
-            style={{
-              float: 'right',
-              marginBottom: 24,
-            }}
-          >
-            <Button type="primary" htmlType="submit">
-              查询
-            </Button>
-            <Button
-              style={{
-                marginLeft: 8,
-              }}
-              onClick={this.handleFormReset}
-            >
-              重置
-            </Button>
-            <a
-              style={{
-                marginLeft: 8,
-              }}
-              onClick={this.toggleForm}
-            >
-              收起 <Icon type="up" />
-            </a>
-          </div>
-        </div>
       </Form>
     );
-  }
-
-  renderForm() {
-    const { expandForm } = this.state;
-    return expandForm ? this.renderAdvancedForm() : this.renderSimpleForm();
   }
 
   render() {
@@ -485,22 +356,7 @@ class ArticlesTableList extends Component {
       <PageHeaderWrapper>
         <Card bordered={false}>
           <div className={styles.tableList}>
-            <div className={styles.tableListForm}>{this.renderForm()}</div>
-            <div className={styles.tableListOperator}>
-              <Button icon="plus" type="primary" onClick={() => router.push('/article/create')}>
-                新增文章
-              </Button>
-              {selectedRows.length > 0 && (
-                <span>
-                  <Button>批量操作</Button>
-                  <Dropdown overlay={menu}>
-                    <Button>
-                      更多操作 <Icon type="down" />
-                    </Button>
-                  </Dropdown>
-                </span>
-              )}
-            </div>
+            <div className={styles.tableListForm}>{this.renderSimpleForm()}</div>
             <StandardTable
               selectedRows={selectedRows}
               loading={loading}

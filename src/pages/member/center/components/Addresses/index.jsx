@@ -1,4 +1,4 @@
-import { Avatar, Card, Dropdown, Icon, List, Menu, Tooltip } from 'antd';
+import { Avatar, Card, Dropdown, Icon, List, Menu, Tooltip, Row } from 'antd';
 import React, { Component } from 'react';
 import { connect } from 'dva';
 import numeral from 'numeral';
@@ -30,12 +30,12 @@ export function formatWan(val) {
   return result;
 }
 
-@connect(({ accountAndcenter }) => ({
-  list: accountAndcenter.list,
+@connect(({ memberCenter }) => ({
+  addresses: memberCenter.currentUser.addresses,
 }))
 class Applications extends Component {
   render() {
-    const { list } = this.props;
+    const { addresses } = this.props;
     const itemMenu = (
       <Menu>
         <Menu.Item>
@@ -82,7 +82,7 @@ class Applications extends Component {
           sm: 2,
           xs: 1,
         }}
-        dataSource={list}
+        dataSource={addresses}
         renderItem={item => (
           <List.Item key={item.id}>
             <Card
@@ -90,28 +90,22 @@ class Applications extends Component {
               bodyStyle={{
                 paddingBottom: 20,
               }}
-              actions={[
-                <Tooltip key="download" title="下载">
-                  <Icon type="download" />
-                </Tooltip>,
-                <Tooltip title="编辑" key="edit">
-                  <Icon type="edit" />
-                </Tooltip>,
-                <Tooltip title="分享" key="share">
-                  <Icon type="share-alt" />
-                </Tooltip>,
-                <Dropdown overlay={itemMenu} key="ellipsis">
-                  <Icon type="ellipsis" />
-                </Dropdown>,
-              ]}
             >
-              <Card.Meta avatar={<Avatar size="small" src={item.avatar} />} title={item.title} />
-              <div className={stylesApplications.cardItemContent}>
+              <Row type="flex" justify="space-between">
+                <Card.Meta title={item.name} />
+                <Card.Meta title={item.phone} />
+              </Row>
+              <p className={stylesApplications.address}>
+                <i />
+                {item.city} {item.address}
+              </p>
+
+              {/* <div className={stylesApplications.cardItemContent}>
                 <CardInfo
                   activeUser={formatWan(item.activeUser)}
                   newUser={numeral(item.newUser).format('0,0')}
                 />
-              </div>
+              </div> */}
             </Card>
           </List.Item>
         )}

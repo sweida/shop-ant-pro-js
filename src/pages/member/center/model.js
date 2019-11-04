@@ -20,7 +20,7 @@ const Model = {
     saveCurrent(state, action) {
       return {
         ...state,
-        currentUser: action.payload || {},
+        currentUser: action.payload,
       };
     },
   },

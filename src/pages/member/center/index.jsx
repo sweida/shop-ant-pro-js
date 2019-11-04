@@ -4,15 +4,15 @@ import { GridContent } from '@ant-design/pro-layout';
 import Link from 'umi/link';
 import { connect } from 'dva';
 import Projects from './components/Projects';
-import Articles from './components/Articles';
-import Applications from './components/Applications';
+import Orders from './components/Orders';
+import Addresses from './components/Addresses';
 import styles from './Center.less';
 const operationTabList = [
   {
-    key: 'articles',
+    key: 'orders',
     tab: (
       <span>
-        文章{' '}
+        订单{' '}
         <span
           style={{
             fontSize: 14,
@@ -24,10 +24,10 @@ const operationTabList = [
     ),
   },
   {
-    key: 'applications',
+    key: 'addresses',
     tab: (
       <span>
-        应用{' '}
+        地址管理{' '}
         <span
           style={{
             fontSize: 14,
@@ -57,6 +57,7 @@ const operationTabList = [
 
 @connect(({ loading, memberCenter }) => ({
   memberCenter,
+  currentUser: memberCenter.currentUser,
   currentUserLoading: loading.effects['accountAndcenter/fetchCurrent'],
 }))
 class Center extends PureComponent {
@@ -79,16 +80,17 @@ class Center extends PureComponent {
     newTags: [],
     inputVisible: false,
     inputValue: '',
-    tabKey: 'articles',
+    tabKey: 'orders',
   };
   input = undefined;
 
   componentDidMount() {
     const { dispatch } = this.props;
     const id = this.props.location.query.id;
+    
     dispatch({
       type: 'memberCenter/fetch',
-      payload: {id}
+      payload: { id },
     });
   }
 
@@ -142,18 +144,20 @@ class Center extends PureComponent {
       return <Projects />;
     }
 
-    if (tabKey === 'applications') {
-      return <Applications />;
+    if (tabKey === 'addresses') {
+      return <Addresses />;
     }
 
-    if (tabKey === 'articles') {
-      return <Articles />;
+    if (tabKey === 'orders') {
+      return <Orders />;
     }
 
     return null;
   };
 
   render() {
+    console.log(this.props, 235);
+
     const { newTags, inputVisible, inputValue, tabKey } = this.state;
     const { currentUser, currentUserLoading } = this.props;
     const dataLoading = currentUserLoading || !(currentUser && Object.keys(currentUser).length);
@@ -171,31 +175,32 @@ class Center extends PureComponent {
               {!dataLoading && (
                 <div>
                   <div className={styles.avatarHolder}>
-                    <img alt="" src={currentUser.avatar} />
-                    <div className={styles.name}>{currentUser.name}</div>
+                    <Avatar size={100} src={currentUser.avatarUrl} icon="user" />
+                    <div className={styles.name}>{currentUser.nickName}</div>
                     <div>{currentUser.signature}</div>
                   </div>
                   <div className={styles.detail}>
                     <p>
-                      <i className={styles.title} />
-                      {currentUser.title}
+                      <Icon type="idcard" />
+                      {currentUser.openid}
                     </p>
                     <p>
-                      <i className={styles.group} />
-                      {currentUser.group}
+                      <Icon type="crown" />
+                      {currentUser.created_at}
                     </p>
                     <p>
                       <i className={styles.address} />
-                      {currentUser.geographic.province.label}
-                      {currentUser.geographic.city.label}
+                      {currentUser.province}
+                      <Divider type="vertical" />
+                      {currentUser.city}
                     </p>
                   </div>
                   <Divider dashed />
                   <div className={styles.tags}>
                     <div className={styles.tagsTitle}>标签</div>
-                    {currentUser.tags.concat(newTags).map(item => (
+                    {/* {currentUser.tags.concat(newTags).map(item => (
                       <Tag key={item.key}>{item.label}</Tag>
-                    ))}
+                    ))} */}
                     {inputVisible && (
                       <Input
                         ref={ref => this.saveInputRef(ref)}
@@ -230,7 +235,7 @@ class Center extends PureComponent {
                   />
                   <div className={styles.team}>
                     <div className={styles.teamTitle}>团队</div>
-                    <Row gutter={36}>
+                    {/* <Row gutter={36}>
                       {currentUser.notice &&
                         currentUser.notice.map(item => (
                           <Col key={item.id} lg={24} xl={12}>
@@ -240,7 +245,7 @@ class Center extends PureComponent {
                             </Link>
                           </Col>
                         ))}
-                    </Row>
+                    </Row> */}
                   </div>
                 </div>
               )}

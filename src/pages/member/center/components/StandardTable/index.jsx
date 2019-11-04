@@ -19,13 +19,13 @@ function initTotalList(columns) {
 class StandardTable extends Component {
   static getDerivedStateFromProps(nextProps) {
     // clean state
-    if (nextProps.selectedRows.length === 0) {
-      const needTotalList = initTotalList(nextProps.columns);
-      return {
-        selectedRowKeys: [],
-        needTotalList,
-      };
-    }
+    // if (nextProps.selectedRows.length === 0) {
+    //   const needTotalList = initTotalList(nextProps.columns);
+    //   return {
+    //     selectedRowKeys: [],
+    //     needTotalList,
+    //   };
+    // }
 
     return null;
   }
@@ -75,8 +75,10 @@ class StandardTable extends Component {
     const { selectedRowKeys, needTotalList } = this.state;
     const { data, rowKey, ...rest } = this.props;
     const { list = [], pagination = false } = data || {};
+
     const paginationProps = pagination
       ? {
+          showSizeChanger: true,
           showQuickJumper: true,
           ...pagination,
         }
